@@ -33,28 +33,26 @@ class AuthController extends Controller
         $request->session()->regenerate();
         $user = Auth::user();
 
-        if (!$user->is_admin) {
-
-            if ($user->status === 'pending') {
-                Auth::logout();
-                return redirect()->route('login')
-                    ->with('pending', 'Your account is awaiting admin approval.');
-            }
-
-            if ($user->status === 'rejected') {
-                Auth::logout();
-                return redirect()->route('login')
-                    ->with('rejected', 'Your account was rejected by the administrator.');
-            }
+        // Admin redirect
+        if ($user->is_admin) {
+            return redirect()->route('admin.dashboard');
         }
 
-        // Role-based redirects
-        return match($user->role) {
-            'technical' => redirect()->route('technical.dashboard'),
-            'admin' => redirect()->route('admin.dashboard'),
-            'manager' => redirect()->route('manager.dashboard'),
-            default => redirect()->route('dashboard'),
-        };
+        // Check pending/rejected status for regular users
+        if ($user->status === 'pending') {
+            Auth::logout();
+            return redirect()->route('login')
+                ->with('pending', 'Your account is awaiting admin approval.');
+        }
+
+        if ($user->status === 'rejected') {
+            Auth::logout();
+            return redirect()->route('login')
+                ->with('rejected', 'Your account was rejected by the administrator.');
+        }
+
+        // Default user dashboard
+        return redirect()->route('dashboard');
     }
 
     public function showRegister()

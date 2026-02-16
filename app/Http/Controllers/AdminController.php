@@ -22,6 +22,11 @@ public function index()
         ->where('status', 'approved')
         ->count();
 
+    // Pending Users (awaiting approval)
+    $pendingUsersCount = User::where('is_admin', false)
+        ->where('status', 'pending')
+        ->count();
+
     // Pending Leave Requests
     $pendingLeaves = LeaveRequest::where('status', 'pending')->count();
 
@@ -39,6 +44,7 @@ public function index()
 
     return view('admin.dashboard', compact(
         'totalEmployees',
+        'pendingUsersCount',
         'pendingLeaves',
         'approvedThisMonth',
         'rejectedLeaves',
@@ -53,8 +59,8 @@ public function index()
             ->where('status', 'pending')
             ->orderBy('created_at', 'asc')
             ->get();
-        $pendingCount = $pendingRequests->count(); // new line
-        return view('admin.leave-requests', compact('pendingRequests'));
+        $pendingCount = $pendingRequests->count();
+        return view('admin.leave-requests', compact('pendingRequests', 'pendingCount'));
     }
 
     /*  Process approve or reject leave requests with admin remarks. */
