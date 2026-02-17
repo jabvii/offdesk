@@ -56,3 +56,16 @@ Route::prefix('admin')->middleware(['auth', AdminMiddleware::class])->group(func
 Route::fallback(function () {
     return response()->view('errors.404', [], 404);
 });
+
+use App\Http\Middleware\TechnicalMiddleware; // we'll make this
+
+Route::prefix('technical')->middleware(['auth', 'technical'])->group(function () {
+    Route::get('/dashboard', [TechnicalAdminController::class, 'dashboard'])
+        ->name('technical.dashboard');
+    
+    Route::get('/accounts', [TechnicalAdminController::class, 'accounts'])->name('technical.accounts');
+    Route::get('/role-management', [TechnicalAdminController::class, 'roleManagement'])->name('technical.role.management');
+    Route::get('/audit-log', [TechnicalAdminController::class, 'auditLog'])->name('technical.audit.log');
+    Route::get('/managers', [TechnicalAdminController::class, 'managersList'])->name('technical.managers.list');
+    Route::get('/statistics', [TechnicalAdminController::class, 'statistics'])->name('technical.statistics');
+});
