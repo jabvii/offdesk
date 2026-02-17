@@ -33,12 +33,20 @@ class AuthController extends Controller
         $request->session()->regenerate();
         $user = Auth::user();
 
-        // Admin redirect
-        if ($user->is_admin) {
+        // Role-based redirect
+        if ($user->role === 'technical') {
+            return redirect()->route('technical.dashboard');
+        }
+
+        if ($user->role === 'admin') {
             return redirect()->route('admin.dashboard');
         }
 
-        // Check pending/rejected status for regular users
+        if ($user->role === 'manager') {
+            return redirect()->route('manager.dashboard');
+        }
+
+        // Check pending/rejected status for employees
         if ($user->status === 'pending') {
             Auth::logout();
             return redirect()->route('login')

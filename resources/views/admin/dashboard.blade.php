@@ -1,133 +1,63 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>OffDesk - Admin Dashboard</title>
-    <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/admin/dashboard.css') }}">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+@extends('layouts.app')
 
-</head>
+@section('title', 'Admin Dashboard')
 
-<body>
-<div class="dashboard-container">
-    <!-- Sidebar -->
-    <nav class="sidebar">
-        <div class="nav-top">
-            <h2>OFFDesk GUESS</h2>
-            <ul class="nav-links">
-                <li>
-                    <a href="{{ route('admin.dashboard') }}" class="active">
-                        Dashboard
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('admin.leave.requests') }}">
-                        Requests
-                        @if($pendingLeaves > 0)
-                            <span class="badge">{{ $pendingLeaves }}</span>
-                        @endif
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('admin.accounts') }}">
-                        Accounts
-                        @if($pendingUsersCount > 0)
-                            <span class="badge">{{ $pendingUsersCount }}</span>
-                        @endif
-                    </a>
-                </li>
-            </ul>
-        </div>
+@section('content')
+<h2 class="mb-4">Admin Dashboard</h2>
 
-        <div class="nav-bottom">
-            <ul class="nav-links">
-                <li>
-                    <form method="POST" action="{{ route('logout') }}" onsubmit="return confirmLogout()">
-                        @csrf
-                        <button type="submit" class="nav-link logout-link">Logout</button>
-                    </form>
-                </li>
-            </ul>
-        </div>
-    </nav>
-
-    <!-- Main Content -->
-    <div class="main-content">
-        <div class="container">
-
-            @if(session('success'))
-                <div class="alert alert-success">{{ session('success') }}</div>
-            @endif
-
-            @if(session('error'))
-                <div class="alert alert-error">{{ session('error') }}</div>
-            @endif
-
-            <div class="dashboard-greeting">
-                <span>Welcome, {{ auth()->user()->name }}!</span>
-            </div>
-
-        <!-- Admin Stats Section -->
-        <div class="stats-grid">
-            <a href="{{ route('admin.approved_accounts') }}" class="card-link">
-            <div class="card green">
-                <h3>
-                    <i class="fas fa-users"></i>
-                    {{ $totalEmployees }}
-                </h3>
-                <p>Total Employees</p>
-                <i class="fas fa-arrow-right arrow-icon"></i>
-            </div>
-            </a>
-
-            <a href="{{ route('admin.leave.requests') }}" class="card-link">
-            <div class="card yellow">
-                <h3>
-                    <i class="fas fa-hourglass-half"></i>
-                    {{ $pendingLeaves }}
-                </h3>
-                <p>Pending Leave Requests</p>
-                <i class="fas fa-arrow-right arrow-icon"></i>
-            </div>
-            </a>
-            <div class="card blue">
-                <h3>
-                    <i class="fas fa-check-circle"></i>
-                    {{ $approvedThisMonth }}
-                </h3>
-                <p>Approved Requests <br>(This Month)</p>
-                <i class="fas fa-arrow-right arrow-icon"></i>
-            </div>
-
-            <div class="card red">
-                <h3>
-                    <i class="fas fa-times-circle"></i>
-                    {{ $rejectedLeaves }}
-                </h3>
-                <p>Rejected Leaves</p>
-                <i class="fas fa-arrow-right arrow-icon"></i>
-            </div>
-
-            <div class="card purple">
-                <h3>
-                    <i class="fas fa-calendar-alt"></i>
-                    {{ $totalThisYear }}
-                </h3>
-                <p>Total Requests <br>(This Year)</p>
-                <i class="fas fa-arrow-right arrow-icon"></i>
-            </div>
-
-        </div>
-
-            </div>
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="stat-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px;">
+            <div style="font-size: 32px; font-weight: bold;">{{ $totalUsers }}</div>
+            <div style="font-size: 14px; opacity: 0.9;">Total Users</div>
         </div>
     </div>
-
+    <div class="col-md-3">
+        <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 20px; border-radius: 8px;">
+            <div style="font-size: 32px; font-weight: bold;">{{ $totalManagers }}</div>
+            <div style="font-size: 14px; opacity: 0.9;">Managers</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 20px; border-radius: 8px;">
+            <div style="font-size: 32px; font-weight: bold;">{{ $totalEmployees }}</div>
+            <div style="font-size: 14px; opacity: 0.9;">Employees</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white; padding: 20px; border-radius: 8px;">
+            <div style="font-size: 32px; font-weight: bold;">{{ $pendingLeaves }}</div>
+            <div style="font-size: 14px; opacity: 0.9;">Pending Approvals</div>
+        </div>
+    </div>
 </div>
 
-<script src="{{ asset('js/dashboard.js') }}"></script>
-</body>
-</html>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card p-4">
+            <h5 class="card-title mb-3">Quick Actions</h5>
+            <a href="{{ route('admin.leave.requests') }}" class="btn btn-primary me-2">Review Leave Requests</a>
+            <a href="{{ route('admin.accounts') }}" class="btn btn-info me-2">Approve Accounts</a>
+            <a href="{{ route('admin.approved_accounts') }}" class="btn btn-success">View Employees</a>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card p-4">
+            <h5>This Month</h5>
+            <p><strong>Approved:</strong> {{ $approvedThisMonth }}</p>
+            <p><strong>Rejected:</strong> {{ $rejectedLeaves }}</p>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card p-4">
+            <h5>This Year</h5>
+            <p><strong>Total Requests:</strong> {{ $totalThisYear }}</p>
+            <p><strong>Pending Approval:</strong> {{ $pendingLeaves }}</p>
+        </div>
+    </div>
+</div>
+
+@endsection

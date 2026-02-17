@@ -84,7 +84,7 @@
                 $leaveDays = [];
                 foreach ($leaveRequests as $request) {
                     $status = strtolower($request->status);
-                    if(!in_array($status, ['approved','pending'])) continue;
+                    if(!in_array($status, ['approved','pending_manager', 'pending_admin'])) continue;
 
                     $start = \Carbon\Carbon::parse($request->start_date);
                     $end = \Carbon\Carbon::parse($request->end_date);
@@ -193,9 +193,19 @@
 
                         <div class="leave-request-actions">
                             <span class="status-badge status-{{ $request->status }}">
-                                {{ ucfirst($request->status) }}
+                                @if($request->status === 'pending_manager')
+                                    Pending Manager Review
+                                @elseif($request->status === 'pending_admin')
+                                    Pending Admin Approval
+                                @elseif($request->status === 'approved')
+                                    Approved
+                                @elseif($request->status === 'rejected')
+                                    Rejected
+                                @else
+                                    {{ ucfirst($request->status) }}
+                                @endif
                             </span>
-                            @if($request->status === 'pending')
+                            @if(in_array($request->status, ['pending_manager', 'pending_admin']))
                                 <form action="{{ route('leave.cancel', $request->id) }}" method="POST">
                                     @csrf
                                     <button type="submit" class="btn btn-danger">Cancel</button>

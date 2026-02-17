@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class User extends Authenticatable
 {
-    use Notifiable;
+    use Notifiable, SoftDeletes;
 
     protected $fillable = [
         'name',
@@ -50,7 +51,17 @@ class User extends Authenticatable
         return $this->hasMany(LeaveRequest::class);
     }
 
-    // Helper methods for role checking
+    public function leaveBalances()
+    {
+        return $this->hasMany(LeaveBalance::class);
+    }
+
+    public function auditLogs()
+    {
+        return $this->morphMany(AuditLog::class, 'auditable');
+    }
+
+    // Relationships for manager-employee hierarchy
     public function isManager(): bool
     {
         return $this->role === 'manager';
@@ -73,7 +84,7 @@ class User extends Authenticatable
 
     public function canApproveLeaves(): bool
     {
-        return in_array($this->role, ['admin', 'technical', 'manager']);
+        return in_array($this->role, ['admin', 'manager']);
     }
 
     public function canManageUsers(): bool
@@ -84,5 +95,15 @@ class User extends Authenticatable
     public function canChangeRoles(): bool
     {
         return $this->role === 'technical';
+    }
+
+    public function canViewAuditLog(): bool
+    {
+        return $this->role === 'technical';
+    }
+
+    public function isApproved(): bool
+    {
+        return $this->status === 'approved';
     }
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\LeaveRequest;
 use App\Models\LeaveBalance;
 use App\Models\User;
+use App\Models\AuditLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -17,18 +18,24 @@ public function index()
     $currentYear = Carbon::now()->year;
     $currentMonth = Carbon::now()->month;
 
-    // Total Employees (non-admin & active)
-    $totalEmployees = User::where('is_admin', false)
+    // Total Users (excluding soft deleted)
+    $totalUsers = User::count();
+
+    // Total Employees (non-admin & non-manager & Active)
+    $totalEmployees = User::where('role', 'employee')
+        ->where('status', 'approved')
+        ->count();
+
+    // Total Managers
+    $totalManagers = User::where('role', 'manager')
         ->where('status', 'approved')
         ->count();
 
     // Pending Users (awaiting approval)
-    $pendingUsersCount = User::where('is_admin', false)
-        ->where('status', 'pending')
-        ->count();
+    $pendingUsersCount = User::where('status', 'pending')->count();
 
-    // Pending Leave Requests
-    $pendingLeaves = LeaveRequest::where('status', 'pending')->count();
+    // Pending Leave Requests for Admin (only pending_admin requests)
+    $pendingLeaves = LeaveRequest::where('status', 'pending_admin')->count();
 
     // Approved Leaves (This Month)
     $approvedThisMonth = LeaveRequest::where('status', 'approved')
@@ -43,7 +50,9 @@ public function index()
     $totalThisYear = LeaveRequest::whereYear('start_date', $currentYear)->count();
 
     return view('admin.dashboard', compact(
+        'totalUsers',
         'totalEmployees',
+        'totalManagers',
         'pendingUsersCount',
         'pendingLeaves',
         'approvedThisMonth',
@@ -52,11 +61,11 @@ public function index()
     ));
 }
 
-    // Page where admin views ALL pending leave requests
+    // Page where admin views ALL pending leave requests for review and final approval
     public function leaveRequests()
     {
-        $pendingRequests = LeaveRequest::with(['user', 'leaveType'])
-            ->where('status', 'pending')
+        $pendingRequests = LeaveRequest::with(['user', 'leaveType', 'manager'])
+            ->where('status', 'pending_admin')
             ->orderBy('created_at', 'asc')
             ->get();
         $pendingCount = $pendingRequests->count();
@@ -65,7 +74,7 @@ public function index()
 
     /*  Process approve or reject leave requests with admin remarks. */
     public function decision(Request $request, $id)
-    {  
+    {
         $request->validate([
             'status' => 'required|in:approved,rejected',
             'admin_remarks' => 'required|string|max:500',
@@ -74,7 +83,7 @@ public function index()
         DB::transaction(function () use ($request, $id) {
 
             $leave = LeaveRequest::where('id', $id)
-                ->where('status', 'pending')
+                ->where('status', 'pending_admin')
                 ->firstOrFail();
 
             $balance = LeaveBalance::where('user_id', $leave->user_id)
@@ -96,6 +105,9 @@ public function index()
             $leave->update([
                 'status' => $request->status,
                 'admin_remarks' => $request->admin_remarks,
+                'reviewed_by' => auth()->id(),
+                'reviewed_at' => now(),
+                'admin_decision' => $request->status,
             ]);
         });
 
@@ -105,12 +117,12 @@ public function index()
 
     public function accounts()
     {
-        // Pending users for the "Pending Accounts" table
+        // Pending users for approval
         $pendingUsers = User::where('status', 'pending')->get();
         $allUsers = User::where('status', '!=', 'pending')->get();
 
         $pendingUsersCount = $pendingUsers->count();
-        $pendingCount = LeaveRequest::where('status', 'pending')->count();
+        $pendingCount = LeaveRequest::where('status', 'pending_admin')->count();
 
         return view('admin.accounts', compact(
             'pendingUsers',
@@ -121,14 +133,13 @@ public function index()
     }
 
     public function approvedEmployees()
-    {   
+    {
         $pendingUsers = User::where('status', 'pending')->get();
         $pendingUsersCount = $pendingUsers->count();
-        $pendingCount = LeaveRequest::where('status', 'pending')->count();
+        $pendingCount = LeaveRequest::where('status', 'pending_admin')->count();
 
-        $employees = User::where('is_admin', 0)
-                        ->where('status', 'approved')
-                        ->get();
+        $employees = User::where('status', 'approved')
+            ->get();
 
         return view('admin.approved_accounts', compact(
             'employees',
@@ -142,6 +153,7 @@ public function index()
     {
         if ($user->id === auth()->id()) return back()->with('error', "Cannot approve yourself.");
 
+        $oldStatus = $user->status;
         $user->update([
             'status' => 'approved',
             'is_approved' => true,
@@ -154,6 +166,7 @@ public function index()
     {
         if ($user->id === auth()->id()) return back()->with('error', "Cannot reject yourself.");
 
+        $oldStatus = $user->status;
         $user->update([
             'status' => 'rejected',
             'is_approved' => false,

@@ -8,9 +8,9 @@ use Illuminate\Support\Facades\Auth;
 
 class AdminMiddleware
 {
-public function handle(Request $request, Closure $next)
+    public function handle(Request $request, Closure $next)
     {
-        if (!Auth::check()|| !Auth::user()->is_admin) {
+        if (!Auth::check() || !Auth::user()->isAdmin()) {
             return redirect('/dashboard')->with('error', 'Unauthorized access.');
         }
 

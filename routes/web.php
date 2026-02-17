@@ -3,7 +3,11 @@
 use App\Http\Controllers\LeaveRequestController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\ManagerController;
+use App\Http\Controllers\TechnicalController;
 use App\Http\Middleware\AdminMiddleware;
+use App\Http\Middleware\ManagerMiddleware;
+use App\Http\Middleware\TechnicalMiddleware;
 use Illuminate\Support\Facades\Route;
 
 // Root redirect
@@ -49,7 +53,53 @@ Route::prefix('admin')->middleware(['auth', AdminMiddleware::class])->group(func
     Route::post('/users/{user}/reject', [AdminController::class, 'rejectUser'])->name('admin.users.reject');
 
     Route::get('/employees/approved', [AdminController::class, 'approvedEmployees'])->name('admin.approved_accounts');
+});
 
+// Manager Routes (auth + manager only)
+Route::prefix('manager')->middleware(['auth', ManagerMiddleware::class])->group(function () {
+    // Manager dashboard
+    Route::get('/dashboard', [ManagerController::class, 'index'])->name('manager.dashboard');
+
+    // View team employees
+    Route::get('/employees', [ManagerController::class, 'employees'])->name('manager.employees');
+
+    // Leave request management
+    Route::get('/leave-requests', [ManagerController::class, 'leaveRequests'])->name('manager.leave.requests');
+    Route::get('/leave-requests/{id}', [ManagerController::class, 'requestDetail'])->name('manager.leave.detail');
+    Route::post('/leave-requests/{id}/forward', [ManagerController::class, 'forward'])->name('manager.leave.forward');
+    Route::post('/leave-requests/{id}/reject', [ManagerController::class, 'reject'])->name('manager.leave.reject');
+
+    // View approved leave requests
+    Route::get('/leave-requests/approved', [ManagerController::class, 'approvedRequests'])->name('manager.leave.approved');
+
+    // Manager submit their own leave request
+    Route::post('/leave/submit', [ManagerController::class, 'submitLeave'])->name('manager.leave.submit');
+});
+
+// Technical Admin Routes (auth + technical only)
+Route::prefix('technical')->middleware(['auth', TechnicalMiddleware::class])->group(function () {
+    // Technical dashboard
+    Route::get('/dashboard', [TechnicalController::class, 'index'])->name('technical.dashboard');
+
+    // Account management
+    Route::get('/accounts', [TechnicalController::class, 'accounts'])->name('technical.accounts');
+    Route::get('/accounts/{id}', [TechnicalController::class, 'accountDetail'])->name('technical.account.detail');
+    Route::post('/accounts/{id}/approve', [TechnicalController::class, 'approveAccount'])->name('technical.account.approve');
+    Route::post('/accounts/{id}/reject', [TechnicalController::class, 'rejectAccount'])->name('technical.account.reject');
+    Route::post('/accounts/{id}/delete', [TechnicalController::class, 'deleteAccount'])->name('technical.account.delete');
+
+    // Audit log
+    Route::get('/audit-log', [TechnicalController::class, 'auditLog'])->name('technical.audit.log');
+
+    // Managers by department
+    Route::get('/managers', [TechnicalController::class, 'managersByDepartment'])->name('technical.managers.list');
+
+    // Role management
+    Route::get('/role-management', [TechnicalController::class, 'roleManagement'])->name('technical.role.management');
+    Route::post('/users/{id}/role', [TechnicalController::class, 'updateRole'])->name('technical.user.role');
+
+    // Statistics
+    Route::get('/statistics', [TechnicalController::class, 'statistics'])->name('technical.statistics');
 });
 
 // This will catch invalid URLs like "/dashboasd"

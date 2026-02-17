@@ -19,9 +19,12 @@ class LeaveRequest extends Model
         'reason',
         'status',
         'admin_remarks',
+        'admin_decision',
         'manager_id',
         'manager_remarks',
         'forwarded_at',
+        'reviewed_by',
+        'reviewed_at',
     ];
 
     protected $casts = [
@@ -42,6 +45,11 @@ class LeaveRequest extends Model
     public function manager(): BelongsTo
     {
         return $this->belongsTo(User::class, 'manager_id', 'id');
+    }
+
+    public function reviewer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'reviewed_by', 'id');
     }
 
     // Helper methods
@@ -80,6 +88,11 @@ class LeaveRequest extends Model
     public function scopePendingForAdmin($query)
     {
         return $query->where('status', 'pending_admin');
+    }
+
+    public function scopeFinal($query)
+    {
+        return $query->whereIn('status', ['approved', 'rejected']);
     }
 
     public static function calculateBusinessDays($startDate, $endDate): int

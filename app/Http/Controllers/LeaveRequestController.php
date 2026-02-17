@@ -78,7 +78,7 @@ class LeaveRequestController extends Controller
 
         // Check overlapping leaves (approved or pending only)
         $overlap = LeaveRequest::where('user_id', $user->id)
-            ->whereIn('status', ['pending', 'approved'])
+            ->whereIn('status', ['pending_manager', 'pending_admin', 'approved'])
             ->where(function($q) use ($start, $end) {
                 $q->whereBetween('start_date', [$start, $end])
                   ->orWhereBetween('end_date', [$start, $end])
@@ -117,7 +117,8 @@ class LeaveRequestController extends Controller
                 'end_session'   => $end_session,
                 'total_days'    => $totalDays,
                 'reason'        => $validated['reason'],
-                'status'        => 'pending',
+                'status'        => 'pending_manager', // Employee request goes to manager first
+                'manager_id'    => $user->manager_id, // Assign to employee's manager
             ]);
 
             $balance->increment('pending_credits', $totalDays);
@@ -132,7 +133,7 @@ class LeaveRequestController extends Controller
             ->where('user_id', Auth::id())
             ->firstOrFail();
 
-        if ($leaveRequest->status !== 'pending') {
+        if (!in_array($leaveRequest->status, ['pending_manager', 'pending_admin'])) {
             return back()->with('error', 'Only pending requests can be cancelled.');
         }
 
