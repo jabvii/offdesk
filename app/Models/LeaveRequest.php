@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Carbon\Carbon;
 
 class LeaveRequest extends Model
@@ -13,8 +14,6 @@ class LeaveRequest extends Model
         'leave_type_id',
         'start_date',
         'end_date',
-        'start_session',
-        'end_session',
         'total_days',
         'reason',
         'status',
@@ -42,6 +41,21 @@ class LeaveRequest extends Model
     public function manager(): BelongsTo
     {
         return $this->belongsTo(User::class, 'manager_id', 'id');
+    }
+
+    public function sessions(): HasMany
+    {
+        return $this->hasMany(LeaveRequestSession::class);
+    }
+
+    /**
+     * Calculate total days based on sessions
+     */
+    public function calculateTotalDaysFromSessions(): float
+    {
+        return $this->sessions->sum(function ($session) {
+            return $session->getDayValue();
+        });
     }
 
     // Helper methods

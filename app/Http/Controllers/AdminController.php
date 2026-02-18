@@ -63,6 +63,23 @@ public function index()
         return view('admin.leave-requests', compact('pendingRequests', 'pendingCount'));
     }
 
+    // Get leave request sessions as JSON
+    public function getLeaveRequestSessions($id)
+    {
+        $leave = LeaveRequest::with('sessions')
+            ->where('status', 'pending')
+            ->findOrFail($id);
+
+        return response()->json([
+            'sessions' => $leave->sessions->map(function ($session) {
+                return [
+                    'date' => $session->date->toDateString(),
+                    'session' => $session->session,
+                ];
+            })->toArray(),
+        ]);
+    }
+
     /*  Process approve or reject leave requests with admin remarks. */
     public function decision(Request $request, $id)
     {  

@@ -89,21 +89,15 @@
                     $start = \Carbon\Carbon::parse($request->start_date);
                     $end = \Carbon\Carbon::parse($request->end_date);
 
+                    // Create a map of sessions by date
+                    $sessionMap = [];
+                    foreach ($request->sessions as $session) {
+                        $sessionMap[$session->date->toDateString()] = $session->session;
+                    }
+
                     while ($start->lte($end)) {
-                        // Determine session for each day
-                        if ($start->eq(\Carbon\Carbon::parse($request->start_date)) && $start->eq(\Carbon\Carbon::parse($request->end_date))) {
-                            // Same day - use both start and end session, but primary is start_session
-                            $session = $request->start_session ?? 'full';
-                        } elseif ($start->eq(\Carbon\Carbon::parse($request->start_date))) {
-                            // First day of multi-day leave
-                            $session = $request->start_session ?? 'full';
-                        } elseif ($start->eq(\Carbon\Carbon::parse($request->end_date))) {
-                            // Last day of multi-day leave
-                            $session = $request->end_session ?? 'full';
-                        } else {
-                            // Middle days - always full
-                            $session = 'full';
-                        }
+                        $dateStr = $start->toDateString();
+                        $session = $sessionMap[$dateStr] ?? 'whole_day';
 
                         $leaveDays[$start->month][$start->day][] = [
                             'id' => $request->id,
@@ -170,18 +164,7 @@
                             <p class="pdark">
                                 {{ \Carbon\Carbon::parse($request->start_date)->format('M d, Y') }}
                                 - {{ \Carbon\Carbon::parse($request->end_date)->format('M d, Y') }}
-                                ({{ $request->total_days }} day{{ $request->total_days > 1 ? 's' : '' }}
-                                @php
-                                    $showSession = false;
-                                    if ($request->start_session && $request->start_session !== 'full') {
-                                        echo " - Start: " . ucfirst($request->start_session);
-                                        $showSession = true;
-                                    }
-                                    if ($request->end_session && $request->end_session !== 'full' && $request->end_session !== $request->start_session) {
-                                        echo " - End: " . ucfirst($request->end_session);
-                                        $showSession = true;
-                                    }
-                                @endphp)
+                                ({{ $request->total_days }} day{{ $request->total_days > 1 ? 's' : '' }})
                             </p>
 
                             <p>{{ $request->reason }}</p>
@@ -218,7 +201,7 @@
         <div class="modal-header">
             <h2>Submit Leave Request</h2>
         </div>
-        <form action="{{ route('leave.store') }}" method="POST">
+        <form action="{{ route('leave.store') }}" method="POST" id="leaveRequestForm">
             @csrf
             <div class="form-group">
                 <label for="leave_type_id">Leave Type</label>
@@ -239,22 +222,22 @@
                 <label for="end_date">End Date</label>
                 <input type="date" name="end_date" id="end_date" required>
             </div>
-            <div class="form-group">
-                <label for="start_session">Start Date Session</label>
-                <select name="start_session" id="start_session">
-                    <option value="full">Full Day</option>
-                    <option value="morning">Morning (8:00am-12:00pm)</option>
-                    <option value="afternoon">Afternoon (1:00pm-5:30pm)</option>
-                </select>
+            
+            <!-- Daily Sessions Table -->
+            <div id="sessionsTableContainer" style="display: none; margin-top: 20px;">
+                <label>Select Session for Each Day</label>
+                <table border="1" cellpadding="8" cellspacing="0" style="width: 100%; margin-top: 10px;">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Session</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sessionsTableBody">
+                    </tbody>
+                </table>
             </div>
-            <div class="form-group">
-                <label for="end_session">End Date Session</label>
-                <select name="end_session" id="end_session">
-                    <option value="full">Full Day</option>
-                    <option value="morning">Morning (8:00am-12:00pm)</option>
-                    <option value="afternoon">Afternoon (1:00pm-5:30pm)</option>
-                </select>
-            </div>
+
             <div class="form-group">
                 <label for="reason">Reason</label>
                 <textarea name="reason" id="reason" required></textarea>
@@ -275,6 +258,103 @@ document.addEventListener('DOMContentLoaded', function() {
     cancelledLeaveIds.forEach(id => {
         const dot = document.querySelector(`.leave-dot[data-leave-id="${id}"]`);
         if(dot) dot.remove();
+    });
+
+    // Handle date changes to generate sessions table
+    const endDateInput = document.getElementById('end_date');
+    const startDateInput = document.getElementById('start_date');
+    const sessionsTableContainer = document.getElementById('sessionsTableContainer');
+    const sessionsTableBody = document.getElementById('sessionsTableBody');
+    const leaveRequestForm = document.getElementById('leaveRequestForm');
+
+    function generateSessionsTable() {
+        const startDate = startDateInput.value;
+        const endDate = endDateInput.value;
+
+        if (!startDate || !endDate) {
+            sessionsTableContainer.style.display = 'none';
+            return;
+        }
+
+        const start = new Date(startDate + 'T00:00:00');
+        const end = new Date(endDate + 'T00:00:00');
+
+        if (start > end) {
+            alert('Start date must be before or equal to end date');
+            endDateInput.value = '';
+            sessionsTableContainer.style.display = 'none';
+            return;
+        }
+
+        // Generate all dates
+        sessionsTableBody.innerHTML = '';
+        let currentDate = new Date(start);
+        const dateFormat = (date) => {
+            return date.toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' });
+        };
+
+        let dayCount = 0;
+        while (currentDate <= end) {
+            const dateStr = currentDate.toISOString().split('T')[0];
+            const formattedDate = dateFormat(currentDate);
+
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${formattedDate}</td>
+                <td>
+                    <select name="daily_sessions[]" class="session-select" data-date="${dateStr}" required>
+                        <option value="whole_day">Whole Day</option>
+                        <option value="morning">Morning (8:00am-12:00pm)</option>
+                        <option value="afternoon">Afternoon (1:00pm-5:30pm)</option>
+                    </select>
+                </td>
+            `;
+            sessionsTableBody.appendChild(row);
+
+            currentDate.setDate(currentDate.getDate() + 1);
+            dayCount++;
+        }
+
+        console.log('Generated sessions table with ' + dayCount + ' days');
+        sessionsTableContainer.style.display = 'block';
+    }
+
+    endDateInput.addEventListener('change', generateSessionsTable);
+    startDateInput.addEventListener('change', generateSessionsTable);
+
+    // Handle form submission - just validate that we have sessions
+    leaveRequestForm.addEventListener('submit', function(e) {
+        const sessionSelects = document.querySelectorAll('.session-select');
+        
+        if (sessionSelects.length === 0) {
+            e.preventDefault();
+            alert('Please select start and end dates first');
+            return false;
+        }
+
+        // Log sessions before submission for debugging
+        const sessions = Array.from(sessionSelects).map(select => select.value);
+        const startDate = document.getElementById('start_date').value;
+        const endDate = document.getElementById('end_date').value;
+        
+        // Calculate expected days (same as PHP)
+        const start = new Date(startDate + 'T00:00:00');
+        const end = new Date(endDate + 'T00:00:00');
+        const timeDiff = end.getTime() - start.getTime();
+        const dayDiff = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
+        
+        console.log('Form submission debug info:');
+        console.log('  Start date:', startDate);
+        console.log('  End date:', endDate);
+        console.log('  Expected days (JS):', dayDiff);
+        console.log('  Session selects found:', sessionSelects.length);
+        console.log('  Sessions:', sessions);
+        
+        if (sessions.length !== dayDiff) {
+            console.error(`Mismatch: expected ${dayDiff} sessions but found ${sessions.length}`);
+        }
+        
+        // Allow form to submit naturally
     });
 });
 </script>

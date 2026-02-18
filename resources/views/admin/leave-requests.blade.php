@@ -41,7 +41,7 @@
                 </li>
             </ul>
         </div>
-    </nav> 
+    </nav>
 
     <!-- Main content -->
     <div class="main-content">
@@ -80,14 +80,8 @@
                             <td>{{ $leave->leaveType->name }}</td>
                             <td>
                                 {{ \Carbon\Carbon::parse($leave->start_date)->format('M d, Y') }} → {{ \Carbon\Carbon::parse($leave->end_date)->format('M d, Y') }}
-                                @php
-                                    if ($leave->start_session && $leave->start_session !== 'full') {
-                                        echo "<br><small>Start: " . ucfirst($leave->start_session) . "</small>";
-                                    }
-                                    if ($leave->end_session && $leave->end_session !== 'full') {
-                                        echo "<br><small>End: " . ucfirst($leave->end_session) . "</small>";
-                                    }
-                                @endphp
+                                <br>
+                                <button type="button" class="view-sessions-btn" data-leave-id="{{ $leave->id }}" style="margin-top: 5px; padding: 3px 6px; font-size: 12px;">View Sessions</button>
                             </td>
                             <td>{{ $leave->total_days }}</td>
                             <td>
@@ -152,6 +146,26 @@
     </div>
 </div>
 
+<!-- View Sessions Modal -->
+<div id="viewSessionsModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Daily Sessions</h3>
+            <button type="button" class="close-sessions-btn" style="border: none; background: none; font-size: 20px; cursor: pointer;">&times;</button>
+        </div>
+        <table border="1" cellpadding="8" cellspacing="0" style="width: 100%; margin-top: 10px;">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Session</th>
+                </tr>
+            </thead>
+            <tbody id="sessionsTableBody">
+            </tbody>
+        </table>
+    </div>
+</div>
+
 <script>
 function confirmLogout() {
     return confirm("Are you sure you want to logout?");
@@ -159,11 +173,14 @@ function confirmLogout() {
 
 document.addEventListener('DOMContentLoaded', function() {
     const modal = document.getElementById('adminActionModal');
+    const viewSessionsModal = document.getElementById('viewSessionsModal');
     const modalTitle = document.getElementById('adminActionTitle');
     const form = document.getElementById('adminActionForm');
     const statusInput = document.getElementById('adminActionStatus');
     const remarks = document.getElementById('adminRemarks');
+    const sessionsTableBody = document.getElementById('sessionsTableBody');
 
+    // Handle Approve/Reject buttons
     document.querySelectorAll('.admin-action-btn').forEach(button => {
         button.addEventListener('click', function() {
             const action = this.dataset.action; // approved / rejected
@@ -196,8 +213,57 @@ document.addEventListener('DOMContentLoaded', function() {
         if(e.target === modal) modal.style.display = 'none';
     });
 
+    // Handle View Sessions button
+    document.querySelectorAll('.view-sessions-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const leaveId = this.dataset.leaveId;
+
+            // Fetch sessions from server
+            fetch(`/admin/employee/leave-requests/${leaveId}/sessions`)
+                .then(response => response.json())
+                .then(data => {
+                    sessionsTableBody.innerHTML = '';
+                    
+                    if (data.sessions && data.sessions.length > 0) {
+                        data.sessions.forEach(session => {
+                            const row = document.createElement('tr');
+                            const date = new Date(session.date + 'T00:00:00');
+                            const formattedDate = date.toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' });
+                            
+                            const sessionDisplay = session.session === 'whole_day' 
+                                ? 'Whole Day' 
+                                : session.session.charAt(0).toUpperCase() + session.session.slice(1);
+                            
+                            row.innerHTML = `
+                                <td>${formattedDate}</td>
+                                <td>${sessionDisplay}</td>
+                            `;
+                            sessionsTableBody.appendChild(row);
+                        });
+                    }
+                    
+                    viewSessionsModal.style.display = 'flex';
+                })
+                .catch(error => {
+                    console.error('Error fetching sessions:', error);
+                    alert('Error loading sessions');
+                });
+        });
+    });
+
+    document.querySelector('.close-sessions-btn').addEventListener('click', function() {
+        viewSessionsModal.style.display = 'none';
+    });
+
+    viewSessionsModal.addEventListener('click', function(e) {
+        if(e.target === viewSessionsModal) viewSessionsModal.style.display = 'none';
+    });
+
     document.addEventListener('keydown', function(e) {
-        if(e.key === 'Escape') modal.style.display = 'none';
+        if(e.key === 'Escape') {
+            modal.style.display = 'none';
+            viewSessionsModal.style.display = 'none';
+        }
     });
 });
 </script>

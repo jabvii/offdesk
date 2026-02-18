@@ -42,6 +42,7 @@ Route::prefix('admin')->middleware(['auth', AdminMiddleware::class])->group(func
     // Leave requests management
     Route::get('employee/leave-requests', [AdminController::class, 'leaveRequests'])->name('admin.leave.requests');
     Route::post('employee/leave-requests/{id}/decision', [AdminController::class, 'decision'])->name('admin.leave.decision');
+    Route::get('employee/leave-requests/{id}/sessions', [AdminController::class, 'getLeaveRequestSessions'])->name('admin.leave.sessions');
 
     // User account approvals
     Route::get('/accounts', [AdminController::class, 'accounts'])->name('admin.accounts');

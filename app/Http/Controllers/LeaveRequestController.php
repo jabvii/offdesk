@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\LeaveRequest;
+use App\Models\LeaveRequestSession;
 use App\Models\LeaveType;
 use App\Models\LeaveBalance;
 use Illuminate\Http\Request;
@@ -43,7 +44,7 @@ class LeaveRequestController extends Controller
 
         $leaveRequests = LeaveRequest::where('user_id', $user->id)
             ->whereYear('start_date', $currentYear)
-            ->with('leaveType')
+            ->with(['leaveType', 'sessions'])
             ->get();
 
         return view('dashboard', compact('balances', 'leaveTypes', 'leaveRequests'));
@@ -56,8 +57,8 @@ class LeaveRequestController extends Controller
             'leave_type_id' => 'required|exists:leave_types,id',
             'start_date'    => 'required|date',
             'end_date'      => 'required|date|after_or_equal:start_date',
-            'start_session' => 'nullable|in:full,morning,afternoon',
-            'end_session'   => 'nullable|in:full,morning,afternoon',
+            'daily_sessions' => 'required|array',
+            'daily_sessions.*' => 'required|in:whole_day,morning,afternoon',
             'reason'        => 'required|string|max:500',
         ]);
 
@@ -65,16 +66,31 @@ class LeaveRequestController extends Controller
 
         $start = Carbon::parse($validated['start_date']);
         $end   = Carbon::parse($validated['end_date']);
-        $start_session = $validated['start_session'] ?? 'full';
-        $end_session   = $validated['end_session'] ?? 'full';
 
         // Prevent past dates
         if ($start->lt(Carbon::today()) || $end->lt(Carbon::today())) {
             return back()->with('error', 'You cannot request leave for past dates.');
         }
 
-        // Calculate total_days considering half-days
-        $totalDays = $this->calculateTotalDays($start, $end, $start_session, $end_session);
+        // Validate that daily_sessions exists and is not empty
+        if (empty($validated['daily_sessions']) || !is_array($validated['daily_sessions'])) {
+            return back()->with('error', 'No sessions data provided.');
+        }
+
+        // Calculate total_days from sessions (this is the source of truth)
+        $totalDays = $this->calculateTotalDaysFromSessions($validated['daily_sessions']);
+        
+        if ($totalDays <= 0) {
+            return back()->with('error', 'Invalid session configuration.');
+        }
+
+        \Log::info('Leave request validation', [
+            'start_date' => $validated['start_date'],
+            'end_date' => $validated['end_date'],
+            'sessions_count' => count($validated['daily_sessions']),
+            'sessions_data' => $validated['daily_sessions'],
+            'calculated_total_days' => $totalDays,
+        ]);
 
         // Check overlapping leaves (approved or pending only)
         $overlap = LeaveRequest::where('user_id', $user->id)
@@ -106,22 +122,34 @@ class LeaveRequestController extends Controller
             return back()->with('error', 'Insufficient leave credits.');
         }
 
-        // Store leave request
-        DB::transaction(function () use ($validated, $user, $totalDays, $balance, $start, $end, $start_session, $end_session) {
-            LeaveRequest::create([
+        // Store leave request with sessions
+        DB::transaction(function () use ($validated, $user, $totalDays, $balance, $start, $end) {
+            $leaveRequest = LeaveRequest::create([
                 'user_id'       => $user->id,
                 'leave_type_id' => $validated['leave_type_id'],
                 'start_date'    => $start->toDateString(),
                 'end_date'      => $end->toDateString(),
-                'start_session' => $start_session,
-                'end_session'   => $end_session,
                 'total_days'    => $totalDays,
                 'reason'        => $validated['reason'],
                 'status'        => 'pending',
             ]);
 
+            // Create daily sessions
+            $currentDate = $start->copy();
+            $sessionIndex = 0;
+            while ($currentDate->lte($end)) {
+                LeaveRequestSession::create([
+                    'leave_request_id' => $leaveRequest->id,
+                    'date' => $currentDate->toDateString(),
+                    'session' => $validated['daily_sessions'][$sessionIndex],
+                ]);
+                $currentDate->addDay();
+                $sessionIndex++;
+            }
+
             $balance->increment('pending_credits', $totalDays);
         });
+        
         return back()->with('success', 'Leave request submitted successfully.');
     }
 
@@ -152,36 +180,20 @@ class LeaveRequestController extends Controller
         return back()->with('success', 'Leave request cancelled successfully.');
     }
 
-    // Helper function to calculate total days with half-day sessions
-    private function calculateTotalDays($start, $end, $startSession, $endSession)
+    // Helper function to calculate total days from sessions
+    private function calculateTotalDaysFromSessions($dailySessions): float
     {
-        if ($start->equalTo($end)) {
-            // Same day logic
-            if ($startSession === 'full' && $endSession === 'full') {
-                return 1;
+        $totalDays = 0;
+
+        foreach ($dailySessions as $session) {
+            if ($session === 'whole_day') {
+                $totalDays += 1;
+            } else {
+                // morning or afternoon
+                $totalDays += 0.5;
             }
-
-            if ($startSession !== 'full' && $endSession !== 'full') {
-                return 1; // morning → afternoon counts as full day
-            }
-
-            return 0.5;
         }
 
-        $daysBetween = $start->diffInDays($end) + 1;
-
-        $total = $daysBetween;
-
-        // Adjust start day
-        if ($startSession !== 'full') {
-            $total -= 0.5;
-        }
-
-        // Adjust end day
-        if ($endSession !== 'full') {
-            $total -= 0.5;
-        }
-
-        return $total;
+        return $totalDays;
     }
 }
