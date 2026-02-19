@@ -437,6 +437,13 @@ h3.vacation, h3.sick, h3.emergency{
     border-radius: 20%;
     margin-left: 20%;
 }
+#remarks{
+    width: 100%;
+    padding: 20px;
+    margin-top: 10px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
 /* Responsive Table */
 @media (max-width: 768px) {
     .requests-table th,

@@ -38,6 +38,11 @@ class AuthController extends Controller
             return redirect()->route('admin.dashboard');
         }
 
+        // Manager redirect
+        if ($user->isManager()) {
+            return redirect()->route('manager.dashboard');
+        }
+
         // Check pending/rejected status for regular users
         if ($user->status === 'pending') {
             Auth::logout();
@@ -51,7 +56,7 @@ class AuthController extends Controller
                 ->with('rejected', 'Your account was rejected by the administrator.');
         }
 
-        // Default user dashboard
+        // Default employee dashboard
         return redirect()->route('dashboard');
     }
 
@@ -69,7 +74,7 @@ class AuthController extends Controller
             'department' => ['required', 'string', 'in:IT,Accounting,HR,Treasury,Sales,Planning,Visual,Engineering'],
         ]);
 
-        User::create([
+        $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
@@ -78,6 +83,16 @@ class AuthController extends Controller
             'status' => 'pending',
             'role' => 'employee',
         ]);
+
+        // 🔥 AUTO ASSIGN MANAGER
+        $manager = User::where('department', $user->department)
+            ->where('role', 'manager')
+            ->first();
+
+        if ($manager) {
+            $user->manager_id = $manager->id;
+            $user->save();
+        }
 
         return redirect()->route('login')
             ->with('success', 'Your account has been created and is pending admin approval.');

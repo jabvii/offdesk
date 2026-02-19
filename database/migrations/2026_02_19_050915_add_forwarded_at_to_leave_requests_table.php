@@ -6,21 +6,20 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /** 
+    /**
      * Run the migrations.
      */
-    public function up()
+    public function up(): void
     {
         Schema::table('leave_requests', function (Blueprint $table) {
-            $table->text('admin_remarks')->nullable()->after('status');
+            $table->timestamp('forwarded_at')->nullable()->after('manager_remarks');
         });
     }
 
-    public function down()
+    public function down(): void
     {
         Schema::table('leave_requests', function (Blueprint $table) {
-            $table->dropColumn('admin_remarks');
+            $table->dropColumn('forwarded_at');
         });
     }
-
 };

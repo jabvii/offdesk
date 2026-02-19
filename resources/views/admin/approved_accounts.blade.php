@@ -72,6 +72,7 @@
                     <tr>
                         <th>Name</th>
                         <th>Email</th>
+                        <th>Role</th>
                         <th>Department</th>
                         <th>Registered At</th>
                     </tr>
@@ -81,6 +82,7 @@
                         <tr>
                             <td>{{ $user->name }}</td>
                             <td>{{ $user->email }}</td>
+                            <td>{{ ucfirst($user->role) }}</td>
                             <td>{{ $user->department }}</td>
                             <td>{{ $user->created_at->format('M d, Y') }}</td>
                         </tr>

@@ -47,9 +47,9 @@ class LeaveRequestController extends Controller
             ->with(['leaveType', 'sessions'])
             ->get();
 
-        return view('dashboard', compact('balances', 'leaveTypes', 'leaveRequests'));
+        return view('employee.dashboard', compact('balances', 'leaveTypes', 'leaveRequests'));
     }
-
+ 
     // Store a new leave request
     public function store(Request $request)
     {
@@ -124,6 +124,9 @@ class LeaveRequestController extends Controller
 
         // Store leave request with sessions
         DB::transaction(function () use ($validated, $user, $totalDays, $balance, $start, $end) {
+            // Determine status based on user role
+            $status = $user->isEmployee() ? 'pending_manager' : 'pending_admin';
+
             $leaveRequest = LeaveRequest::create([
                 'user_id'       => $user->id,
                 'leave_type_id' => $validated['leave_type_id'],
@@ -131,7 +134,7 @@ class LeaveRequestController extends Controller
                 'end_date'      => $end->toDateString(),
                 'total_days'    => $totalDays,
                 'reason'        => $validated['reason'],
-                'status'        => 'pending',
+                'status'        => $status,
             ]);
 
             // Create daily sessions

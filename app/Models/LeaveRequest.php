@@ -17,9 +17,9 @@ class LeaveRequest extends Model
         'total_days',
         'reason',
         'status',
+        'manager_remarks',
         'admin_remarks',
         'manager_id',
-        'manager_remarks',
         'forwarded_at',
     ];
 

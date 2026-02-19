@@ -28,7 +28,7 @@ public function index()
         ->count();
 
     // Pending Leave Requests
-    $pendingLeaves = LeaveRequest::where('status', 'pending')->count();
+    $pendingLeaves = LeaveRequest::whereIn('status', ['pending_admin'])->count();
 
     // Approved Leaves (This Month)
     $approvedThisMonth = LeaveRequest::where('status', 'approved')
@@ -56,7 +56,7 @@ public function index()
     public function leaveRequests()
     {
         $pendingRequests = LeaveRequest::with(['user', 'leaveType'])
-            ->where('status', 'pending')
+            ->where('status', 'pending_admin')
             ->orderBy('created_at', 'asc')
             ->get();
         $pendingCount = $pendingRequests->count();
@@ -67,7 +67,7 @@ public function index()
     public function getLeaveRequestSessions($id)
     {
         $leave = LeaveRequest::with('sessions')
-            ->where('status', 'pending')
+            ->where('status', 'pending_admin')
             ->findOrFail($id);
 
         return response()->json([
@@ -91,7 +91,7 @@ public function index()
         DB::transaction(function () use ($request, $id) {
 
             $leave = LeaveRequest::where('id', $id)
-                ->where('status', 'pending')
+                ->where('status', 'pending_admin')
                 ->firstOrFail();
 
             $balance = LeaveBalance::where('user_id', $leave->user_id)
@@ -127,7 +127,7 @@ public function index()
         $allUsers = User::where('status', '!=', 'pending')->get();
 
         $pendingUsersCount = $pendingUsers->count();
-        $pendingCount = LeaveRequest::where('status', 'pending')->count();
+        $pendingCount = LeaveRequest::where('status', 'pending_admin')->count();
 
         return view('admin.accounts', compact(
             'pendingUsers',
@@ -178,5 +178,6 @@ public function index()
 
         return back()->with('success', "{$user->name} rejected!");
     }
+
 
 }

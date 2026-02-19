@@ -27,6 +27,9 @@
                 <li>
                     <a href="{{ route('admin.accounts') }}">
                         Accounts
+                        @if($pendingUsersCount > 0)
+                            <span class="badge">{{ $pendingUsersCount }}</span>
+                        @endif
                     </a>
                 </li>
             </ul>
@@ -82,7 +85,7 @@
                                 {{ \Carbon\Carbon::parse($leave->start_date)->format('M d, Y') }} → {{ \Carbon\Carbon::parse($leave->end_date)->format('M d, Y') }}
                                 <br>
                                 <button type="button" class="view-sessions-btn" data-leave-id="{{ $leave->id }}" style="margin-top: 5px; padding: 3px 6px; font-size: 12px;">View Sessions</button>
-                            </td>
+                            </td> 
                             <td>{{ $leave->total_days }}</td>
                             <td>
                                 @if($leave->user->isManager())
@@ -91,7 +94,7 @@
                                     <span style="background: #5B8DBE; color: white; padding: 3px 8px; border-radius: 3px; font-size: 12px;">Employee Request</span>
                                 @endif
                             </td>
-                            <td>
+                            <td> 
                                 @if($leave->manager)
                                     <strong>{{ $leave->manager->name }}</strong><br>
                                     <small style="color: #888;">{{ $leave->manager_remarks ?? 'No remarks' }}</small>

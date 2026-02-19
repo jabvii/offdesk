@@ -9,6 +9,7 @@ class AdminUserSeeder extends Seeder
 {
     public function run()
     {
+        // ADMIN
         $adminEmail = 'admin@example.com';
         if (!User::where('email', $adminEmail)->exists()) {
             User::create([
@@ -16,6 +17,7 @@ class AdminUserSeeder extends Seeder
                 'email' => $adminEmail,
                 'password' => bcrypt('password123'),
                 'is_admin' => true,
+                'role' => 'admin',
                 'status' => 'approved',
             ]);
         }

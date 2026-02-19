@@ -1,0 +1,145 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\LeaveRequest;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use App\Models\LeaveType;
+use Carbon\Carbon;
+
+class ManagerController extends Controller
+{
+    // Manager dashboard
+    public function dashboard()
+    {
+        $user = Auth::user();
+        $currentYear = date('Y');
+
+        $leaveTypes = \App\Models\LeaveType::all();
+
+        // Ensure balances exist
+        foreach ($leaveTypes as $type) {
+            \App\Models\LeaveBalance::firstOrCreate(
+                [
+                    'user_id' => $user->id,
+                    'leave_type_id' => $type->id,
+                    'year' => $currentYear,
+                ],
+                [
+                    'total_credits' => $type->max_days,
+                    'used_credits' => 0,
+                    'pending_credits' => 0,
+                ]
+            );
+        }
+
+        $balances = \App\Models\LeaveBalance::where('user_id', $user->id)
+            ->where('year', $currentYear)
+            ->with('leaveType')
+            ->get();
+
+        $leaveRequests = LeaveRequest::where('user_id', $user->id)
+            ->whereYear('start_date', $currentYear)
+            ->with(['leaveType', 'sessions'])
+            ->get();
+
+        $pendingCount = LeaveRequest::where('status', 'pending_manager')->count();
+
+        return view('manager.dashboard', compact('balances', 'leaveTypes', 'leaveRequests', 'pendingCount'));
+    }
+
+    // View pending employee requests awaiting manager approval
+    public function leaveRequests()
+    {
+        $manager = Auth::user();
+
+        $pendingRequests = LeaveRequest::with(['user', 'leaveType'])
+            ->where('status', 'pending_manager')
+            ->whereIn('user_id', User::where('manager_id', $manager->id)->pluck('id'))
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+        $pendingCount = $pendingRequests->count();
+
+        // Pass leave types to Blade for modal
+        $leaveTypes = LeaveType::all();
+
+        return view('manager.leave-requests', compact('pendingRequests', 'pendingCount', 'leaveTypes'));
+    }
+
+    // Approve/Reject employee leave request
+    public function decision(Request $request, $id)
+    {
+        $request->validate([
+            'status' => 'required|in:approved,rejected',
+            'manager_remarks' => 'required|string|max:500',
+        ]);
+
+        $manager = Auth::user();
+
+        DB::transaction(function () use ($request, $id, $manager) {
+            $leave = LeaveRequest::where('id', $id)
+                ->where('status', 'pending_manager')
+                ->firstOrFail();
+
+            // Verify manager is responsible for this employee
+            if ($leave->user->manager_id !== $manager->id) {
+                abort(403, 'Unauthorized');
+            }
+
+            if ($request->status === 'approved') {
+                // Forward to admin
+                $leave->update([
+                    'status' => 'pending_admin',
+                    'manager_remarks' => $request->manager_remarks,
+                    'forwarded_at' => now(),
+                ]);
+            } elseif ($request->status === 'rejected') {
+                // Reject directly
+                $balance = \App\Models\LeaveBalance::where('user_id', $leave->user_id)
+                    ->where('leave_type_id', $leave->leave_type_id)
+                    ->where('year', date('Y'))
+                    ->first();
+
+                if ($balance) {
+                    $balance->decrement('pending_credits', $leave->total_days);
+                }
+
+                $leave->update([
+                    'status' => 'rejected',
+                    'manager_remarks' => $request->manager_remarks,
+                ]);
+            }
+        });
+
+        $msg = $request->status === 'approved' ? 'forwarded to admin' : 'rejected';
+        return back()->with('success', "Leave request {$msg} successfully.");
+    }
+
+    // Get leave sessions for modal
+    public function getLeaveRequestSessions($id)
+    {
+        $manager = Auth::user();
+        
+        $leave = LeaveRequest::with('sessions')
+            ->where('status', 'pending_manager')
+            ->findOrFail($id);
+
+        // Verify manager is responsible
+        if ($leave->user->manager_id !== $manager->id) {
+            abort(403);
+        }
+
+        return response()->json([
+            'sessions' => $leave->sessions->map(function ($session) {
+                return [
+                    'date' => $session->date->toDateString(),
+                    'session' => $session->session,
+                ];
+            })->toArray(),
+        ]);
+    }
+}
