@@ -139,16 +139,23 @@ class LeaveRequestController extends Controller
 
             // Create daily sessions
             $currentDate = $start->copy();
-            $sessionIndex = 0;
-            while ($currentDate->lte($end)) {
-                LeaveRequestSession::create([
-                    'leave_request_id' => $leaveRequest->id,
-                    'date' => $currentDate->toDateString(),
-                    'session' => $validated['daily_sessions'][$sessionIndex],
-                ]);
-                $currentDate->addDay();
-                $sessionIndex++;
-            }
+$sessionIndex = 0;
+while ($currentDate->lte($end)) {
+    // Skip weekends — frontend doesn't submit sessions for them
+    if ($currentDate->isWeekend()) {
+        $currentDate->addDay();
+        continue;
+    }
+
+    LeaveRequestSession::create([
+        'leave_request_id' => $leaveRequest->id,
+        'date'             => $currentDate->toDateString(),
+        'session'          => $validated['daily_sessions'][$sessionIndex],
+    ]);
+
+    $currentDate->addDay();
+    $sessionIndex++;
+}
 
             $balance->increment('pending_credits', $totalDays);
         });

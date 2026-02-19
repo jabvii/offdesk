@@ -260,7 +260,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if(dot) dot.remove();
     });
 
-    // Handle date changes to generate sessions table
     const endDateInput = document.getElementById('end_date');
     const startDateInput = document.getElementById('start_date');
     const sessionsTableContainer = document.getElementById('sessionsTableContainer');
@@ -286,31 +285,45 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // Generate all dates
         sessionsTableBody.innerHTML = '';
         let currentDate = new Date(start);
-        const dateFormat = (date) => {
-            return date.toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' });
-        };
+        const dateFormat = (date) => date.toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' });
 
         let dayCount = 0;
         while (currentDate <= end) {
             const dateStr = currentDate.toISOString().split('T')[0];
             const formattedDate = dateFormat(currentDate);
+            const dayOfWeek = currentDate.getDay(); // 0 = Sunday, 6 = Saturday
+            const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
 
             const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${formattedDate}</td>
-                <td>
-                    <select name="daily_sessions[]" class="session-select" data-date="${dateStr}" required>
-                        <option value="whole_day">Whole Day</option>
-                        <option value="morning">Morning (8:00am-12:00pm)</option>
-                        <option value="afternoon">Afternoon (1:00pm-5:30pm)</option>
-                    </select>
-                </td>
-            `;
-            sessionsTableBody.appendChild(row);
 
+            if (isWeekend) {
+                row.classList.add('weekend-row');
+                row.style.backgroundColor = '#f0f0f0';
+                row.style.color = '#999';
+                row.innerHTML = `
+                    <td>${formattedDate}</td>
+                    <td>
+                        <span class="weekend-label" style="font-style: italic; color: #aaa;">
+                            Weekend
+                        </span>
+                    </td>
+                `;
+            } else {
+                row.innerHTML = `
+                    <td>${formattedDate}</td>
+                    <td>
+                        <select name="daily_sessions[]" class="session-select" data-date="${dateStr}" required>
+                            <option value="whole_day">Whole Day</option>
+                            <option value="morning">Morning (8:00am-12:00pm)</option>
+                            <option value="afternoon">Afternoon (1:00pm-5:30pm)</option>
+                        </select>
+                    </td>
+                `;
+            }
+
+            sessionsTableBody.appendChild(row);
             currentDate.setDate(currentDate.getDate() + 1);
             dayCount++;
         }
@@ -322,39 +335,40 @@ document.addEventListener('DOMContentLoaded', function() {
     endDateInput.addEventListener('change', generateSessionsTable);
     startDateInput.addEventListener('change', generateSessionsTable);
 
-    // Handle form submission - just validate that we have sessions
     leaveRequestForm.addEventListener('submit', function(e) {
         const sessionSelects = document.querySelectorAll('.session-select');
-        
+
         if (sessionSelects.length === 0) {
             e.preventDefault();
             alert('Please select start and end dates first');
             return false;
         }
 
-        // Log sessions before submission for debugging
         const sessions = Array.from(sessionSelects).map(select => select.value);
         const startDate = document.getElementById('start_date').value;
         const endDate = document.getElementById('end_date').value;
-        
-        // Calculate expected days (same as PHP)
+
+        // Count only weekdays between start and end
         const start = new Date(startDate + 'T00:00:00');
         const end = new Date(endDate + 'T00:00:00');
-        const timeDiff = end.getTime() - start.getTime();
-        const dayDiff = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
-        
+        let weekdayCount = 0;
+        let d = new Date(start);
+        while (d <= end) {
+            const day = d.getDay();
+            if (day !== 0 && day !== 6) weekdayCount++;
+            d.setDate(d.getDate() + 1);
+        }
+
         console.log('Form submission debug info:');
         console.log('  Start date:', startDate);
         console.log('  End date:', endDate);
-        console.log('  Expected days (JS):', dayDiff);
+        console.log('  Expected weekdays (JS):', weekdayCount);
         console.log('  Session selects found:', sessionSelects.length);
         console.log('  Sessions:', sessions);
-        
-        if (sessions.length !== dayDiff) {
-            console.error(`Mismatch: expected ${dayDiff} sessions but found ${sessions.length}`);
+
+        if (sessions.length !== weekdayCount) {
+            console.error(`Mismatch: expected ${weekdayCount} sessions but found ${sessions.length}`);
         }
-        
-        // Allow form to submit naturally
     });
 });
 </script>
