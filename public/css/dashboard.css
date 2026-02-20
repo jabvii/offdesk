@@ -5,7 +5,7 @@
 }
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    background: #e4e4e4;
+    background: #2c3e50cc;
     margin: 0;
 }
 .container {
@@ -17,8 +17,7 @@ body {
     min-height: 100vh;
 }
 .dashboard-greeting {
-    background: #f8f9fa;
-    border-left: 4px solid #2c3e50;
+    background: transparent;
     padding: 12px 16px;
     border-radius: 8px;
     margin-bottom: 20px;
@@ -32,7 +31,7 @@ body {
 .dashboard-greeting span {
     font-size: 22px;
     font-weight: 600;
-    color: #2c3e50;
+    color: white;
 }
 
 .sidebar {
@@ -48,14 +47,6 @@ body {
     position: sticky;
     top: 0;
 }
-/* 
-███╗   ██╗ █████╗ ██╗   ██╗
-████╗  ██║██╔══██╗██║   ██║
-██╔██╗ ██║███████║██║   ██║
-██║╚██╗██║██╔══██║╚██╗ ██╔╝
-██║ ╚████║██║  ██║ ╚████╔╝
-╚═╝  ╚═══╝╚═╝  ╚═╝  ╚═══╝
-*/
 .nav-links {
     list-style: none;
     padding: 0;
@@ -104,7 +95,6 @@ body {
 .main-content {
     flex-grow: 1;
     padding: 20px;
-    background-color: #f3f4f6;
 }
 .header {
     display: flex;
@@ -155,10 +145,8 @@ body {
     margin-bottom: 30px;
 }
 .balance-card {
-    background: white;
+    background: #1f2937;
     padding: 24px;
-    border-left: 4px solid #2c3e50;
-    border-radius: 6px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 .balance-card h3 {
@@ -181,20 +169,19 @@ body {
     border-bottom: none;
 }
 .balance-label {
-    color: rgb(66, 66, 66);
+    color: white;
     font-size: 14px;
 }
 .balance-value {
     font-weight: 600;
-    color: #2c3e50;
+    color: white
 }
 .balance-value.available {
     color: #27ae60;
 }
 
 .calendar-section {
-    background: white;
-    border-radius: 12px;
+    background: #1f2937;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 .calendar-header {
@@ -202,7 +189,8 @@ body {
     margin-bottom: 20px;
 }
 .calendar-header h2 {
-    color: #2c3e50;
+    color: white;
+    padding-top: 14px;
     font-size: 22px;
 }
 .calendar-table-wrapper {
@@ -215,6 +203,7 @@ body {
 }
 .calendar-table th:not(:first-child),
 .calendar-table td:not(:first-child) {
+    color: #1f2937;
     width: 36px;
     min-width: 32px;
     max-width: 36px;
@@ -223,6 +212,7 @@ body {
 .calendar-table th,
 .calendar-table td {
     border: 1px solid #7070708f;
+    color: #1f2937;
     padding: 6px;
     font-size: 12px;
     text-align: center;
@@ -293,7 +283,6 @@ body {
     background: white;
     padding: 32px;
     border: 3px solid #2c3e50;
-    border-radius: 12px;
     max-width: 500px;
     width: 90%;
     max-height: 90vh;
@@ -359,13 +348,12 @@ body {
 }
 .leave-requests-list h2 {
     margin-bottom: 16px;
-    color: #2c3e50;
+    color: white;
 }
 .leave-request-item {
-    background: white;
+    background: #1f2937;
     padding: 16px;
     border-radius: 4px;
-    border-left: 4px solid #2c3e50;
     margin-bottom: 12px;
     display: flex;
     justify-content: space-between;
@@ -373,11 +361,11 @@ body {
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 .leave-request-info h4 {
-    color: #2c3e50;
+    color: white;
     margin-bottom: 4px;
 }
 .leave-request-info p {
-    color: #7f8c8d;
+    color: white;
     font-size: 14px;
 }
 .leave-request-actions {
@@ -391,6 +379,7 @@ body {
     border-radius: 12px;
     font-size: 12px;
     font-weight: 600;
+    color: white;
 }
 .status-pending {
     background: #fff3cd;
@@ -414,9 +403,6 @@ body {
     padding: 20px;
 }
 
-.pdark {
-    color: black !important;
-}
 h3.vacation, h4.vacation {
     color: #3498db;
 }

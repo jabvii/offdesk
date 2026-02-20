@@ -47,10 +47,6 @@
     <div class="main-content">
         <div class="container">
 
-            <div class="dashboard-greeting">
-                <span>Welcome, {{ auth()->user()->name }}!</span>
-            </div>
-
             @if(session('success'))
                 <div class="alert alert-success">{{ session('success') }}</div>
             @endif
@@ -100,7 +96,7 @@
                 </tbody>
             </table>
 
-            <h2 class="dblue" style="margin-top:40px;">All Accounts</h2>
+            <h2 class="dblue acc" style="margin-top:40px;">All Accounts</h2>
 
             <table>
                 <thead>

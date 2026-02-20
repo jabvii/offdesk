@@ -54,10 +54,6 @@
     <div class="main-content">
         <div class="container">
 
-            <div class="dashboard-greeting">
-                <span>Welcome, {{ auth()->user()->name }}!</span>
-            </div>
-
             @if(session('success'))
                 <div class="alert alert-success">{{ session('success') }}</div>
             @endif

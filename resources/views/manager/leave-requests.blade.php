@@ -13,7 +13,7 @@
     <!-- Sidebar -->
     <nav class="sidebar">
         <div class="nav-top">
-            <h2>OFFDESK GUESS</h2>
+            <h2>OFFDesk GUESS</h2>
             <ul class="nav-links">
                 <li><a href="{{ route('manager.dashboard') }}">Dashboard</a></li>
                 <li><a href="#" id="openLeaveModalLink">Request Leave</a></li>
@@ -42,9 +42,6 @@
     <!-- Main content -->
     <div class="main-content">
         <div class="container">
-            <div class="dashboard-greeting">
-                <span>Welcome, {{ auth()->user()->name }}!</span>
-            </div>
 
             @if(session('success'))
                 <div class="alert alert-success">{{ session('success') }}</div>

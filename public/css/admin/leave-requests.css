@@ -1,5 +1,5 @@
 .dblue {
-    color: #2c3e50;
+    color: white;
 }
 .modal {
     display: none;
@@ -58,14 +58,16 @@
 }
 .requests-table th,
 .requests-table td {
+    background-color: white;
     padding: 4px 16px;
     font-size: 14px;
+
 }
 .requests-table th {
-    background-color: #faf8f8;
-    color: #2c3e50;
+    background-color: #1f2937 ;
+    color: white;
 }
-.requests-table tr:hover {
+.requests-table tr:hover { 
     background-color: #f1f5f9;
 } 
 .requests-table td form {
