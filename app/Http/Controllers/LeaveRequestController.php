@@ -79,9 +79,24 @@ class LeaveRequestController extends Controller
 
         // Calculate total_days from sessions (this is the source of truth)
         $totalDays = $this->calculateTotalDaysFromSessions($validated['daily_sessions']);
-        
+
         if ($totalDays <= 0) {
             return back()->with('error', 'Invalid session configuration.');
+        }
+
+        // Count weekdays in the date range to validate session count
+        $currentDate = $start->copy();
+        $weekdayCount = 0;
+        while ($currentDate->lte($end)) {
+            if (!$currentDate->isWeekend()) {
+                $weekdayCount++;
+            }
+            $currentDate->addDay();
+        }
+
+        // Validate that the number of sessions matches the number of weekdays
+        if (count($validated['daily_sessions']) !== $weekdayCount) {
+            return back()->with('error', 'Session count mismatch. Expected ' . $weekdayCount . ' sessions for weekdays only.');
         }
 
         \Log::info('Leave request validation', [
@@ -139,27 +154,27 @@ class LeaveRequestController extends Controller
 
             // Create daily sessions
             $currentDate = $start->copy();
-$sessionIndex = 0;
-while ($currentDate->lte($end)) {
-    // Skip weekends — frontend doesn't submit sessions for them
-    if ($currentDate->isWeekend()) {
-        $currentDate->addDay();
-        continue;
-    }
+            $sessionIndex = 0;
+            while ($currentDate->lte($end)) {
+                // Skip weekends — frontend doesn't submit sessions for them
+                if ($currentDate->isWeekend()) {
+                    $currentDate->addDay();
+                    continue;
+                }
 
-    LeaveRequestSession::create([
-        'leave_request_id' => $leaveRequest->id,
-        'date'             => $currentDate->toDateString(),
-        'session'          => $validated['daily_sessions'][$sessionIndex],
-    ]);
+                LeaveRequestSession::create([
+                    'leave_request_id' => $leaveRequest->id,
+                    'date'             => $currentDate->toDateString(),
+                    'session'          => $validated['daily_sessions'][$sessionIndex],
+                ]);
 
-    $currentDate->addDay();
-    $sessionIndex++;
-}
+                $currentDate->addDay();
+                $sessionIndex++;
+            }
 
             $balance->increment('pending_credits', $totalDays);
         });
-        
+
         return back()->with('success', 'Leave request submitted successfully.');
     }
 
@@ -170,7 +185,7 @@ while ($currentDate->lte($end)) {
             ->where('user_id', Auth::id())
             ->firstOrFail();
 
-        if ($leaveRequest->status !== 'pending') {
+        if (!in_array($leaveRequest->status, ['pending_manager', 'pending_admin'])) {
             return back()->with('error', 'Only pending requests can be cancelled.');
         }
 

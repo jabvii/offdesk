@@ -71,6 +71,8 @@ public function index()
             ->findOrFail($id);
 
         return response()->json([
+            'start_date' => $leave->start_date->toDateString(),
+            'end_date' => $leave->end_date->toDateString(),
             'sessions' => $leave->sessions->map(function ($session) {
                 return [
                     'date' => $session->date->toDateString(),

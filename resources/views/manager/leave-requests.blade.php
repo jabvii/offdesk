@@ -210,18 +210,37 @@ function generateSessionsTable() {
     }
     sessionsTableBody.innerHTML = '';
     let currentDate = new Date(start);
+    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
     while(currentDate <= end){
-        const dateStr = currentDate.toISOString().split('T')[0];
         const formattedDate = currentDate.toLocaleDateString('en-US', { year:'numeric', month:'2-digit', day:'2-digit' });
+        const dayOfWeek = currentDate.getDay();
+        const dayName = dayNames[dayOfWeek];
+        const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
         const row = document.createElement('tr');
-        row.innerHTML = `<td>${formattedDate}</td>
-            <td>
-                <select name="daily_sessions[]" class="session-select" required>
-                    <option value="whole_day">Whole Day</option>
-                    <option value="morning">Morning (8:00am-12:00pm)</option>
-                    <option value="afternoon">Afternoon (1:00pm-5:30pm)</option>
-                </select>
-            </td>`;
+
+        if(isWeekend) {
+            row.style.backgroundColor = '#f0f0f0';
+            row.style.color = '#999';
+            row.innerHTML = `
+                <td>${formattedDate} <span style="font-weight: normal; color: #999;">(${dayName})</span></td>
+                <td>
+                    <span style="font-style: italic; color: #aaa;">
+                        Weekend
+                    </span>
+                </td>
+            `;
+        } else {
+            row.innerHTML = `<td>${formattedDate} <span style="font-weight: normal; color: #666;">(${dayName})</span></td>
+                <td>
+                    <select name="daily_sessions[]" class="session-select" required>
+                        <option value="whole_day">Whole Day</option>
+                        <option value="morning">Morning (8:00am-12:00pm)</option>
+                        <option value="afternoon">Afternoon (1:00pm-5:30pm)</option>
+                    </select>
+                </td>`;
+        }
+
         sessionsTableBody.appendChild(row);
         currentDate.setDate(currentDate.getDate() + 1);
     }
@@ -266,12 +285,51 @@ document.querySelectorAll('.view-sessions-btn').forEach(button => {
             .then(data => {
                 const body = document.getElementById('sessionsTableBodyModal');
                 body.innerHTML = '';
-                data.sessions.forEach(s=>{
-                    const date = new Date(s.date+'T00:00:00');
-                    const formattedDate = date.toLocaleDateString('en-US',{year:'numeric',month:'2-digit',day:'2-digit'});
-                    const sessionDisplay = s.session==='whole_day'?'Whole Day':s.session.charAt(0).toUpperCase()+s.session.slice(1);
-                    body.innerHTML += `<tr><td>${formattedDate}</td><td>${sessionDisplay}</td></tr>`;
+
+                const startDate = new Date(data.start_date + 'T00:00:00');
+                const endDate = new Date(data.end_date + 'T00:00:00');
+
+                // Create a map of sessions by date for quick lookup
+                const sessionMap = {};
+                data.sessions.forEach(s => {
+                    sessionMap[s.date] = s.session;
                 });
+
+                const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+                // Generate all dates in range
+                let currentDate = new Date(startDate);
+                while(currentDate <= endDate) {
+                    // Construct date string in local timezone to match database
+                    const year = currentDate.getFullYear();
+                    const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+                    const day = String(currentDate.getDate()).padStart(2, '0');
+                    const dateStr = `${year}-${month}-${day}`;
+
+                    const formattedDate = currentDate.toLocaleDateString('en-US', {year:'numeric', month:'2-digit', day:'2-digit'});
+                    const dayOfWeek = currentDate.getDay();
+                    const dayName = dayNames[dayOfWeek];
+                    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+
+                    const row = document.createElement('tr');
+
+                    if(isWeekend) {
+                        row.style.backgroundColor = '#f0f0f0';
+                        row.style.color = '#999';
+                        row.innerHTML = `
+                            <td>${formattedDate} <span style="font-weight: normal; color: #999;">(${dayName})</span></td>
+                            <td><span style="font-style: italic; color: #aaa;">Weekend</span></td>
+                        `;
+                    } else {
+                        const session = sessionMap[dateStr] || 'whole_day';
+                        const sessionDisplay = session === 'whole_day' ? 'Whole Day' : session.charAt(0).toUpperCase() + session.slice(1);
+                        row.innerHTML = `<td>${formattedDate} <span style="font-weight: normal; color: #666;">(${dayName})</span></td><td>${sessionDisplay}</td>`;
+                    }
+
+                    body.appendChild(row);
+                    currentDate.setDate(currentDate.getDate() + 1);
+                }
+
                 viewSessionsModal.style.display='flex';
             })
             .catch(()=> alert('Error loading sessions'));

@@ -178,7 +178,7 @@
                             <span class="status-badge status-{{ $request->status }}">
                                 {{ ucfirst($request->status) }}
                             </span>
-                            @if($request->status === 'pending')
+                            @if(in_array($request->status, ['pending_manager', 'pending_admin']))
                                 <form action="{{ route('leave.cancel', $request->id) }}" method="POST">
                                     @csrf
                                     <button type="submit" class="btn btn-danger">Cancel</button>
