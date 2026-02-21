@@ -141,13 +141,21 @@
                                 <td class="month-name">{{ $date->format('F') }}</td>
                                 @for ($day = 1; $day <= 31; $day++)
                                     @if ($day <= $daysInMonth)
-                                        @php $dayLeaves = $leaveDays[$month][$day] ?? []; @endphp
-                                        <td class="calendar-day {{ count($dayLeaves) ? 'has-leave' : '' }}">
-                                            @foreach($dayLeaves as $leave)
-                                                <div class="leave-dot {{ $leave['type'] }} {{ $leave['session'] }}">
-                                                    {{ $leave['session'] !== 'whole_day' ? strtoupper($leave['session'][0]) : '' }}
-                                                </div>
-                                            @endforeach
+                                        @php 
+                                            $dayLeaves = $leaveDays[$month][$day] ?? [];
+                                            $currentDate = \Carbon\Carbon::create(now()->year, $month, $day);
+                                            $isWeekend = $currentDate->isWeekend();
+                                        @endphp
+                                        <td class="calendar-day {{ count($dayLeaves) ? 'has-leave' : '' }} {{ $isWeekend ? 'weekend' : '' }}">
+                                            @if($isWeekend)
+                                                <div class="weekend-indicator" title="Weekend"></div>
+                                            @else
+                                                @foreach($dayLeaves as $leave)
+                                                    <div class="leave-dot {{ $leave['type'] }} {{ $leave['session'] }}">
+                                                        {{ $leave['session'] !== 'whole_day' ? strtoupper($leave['session'][0]) : '' }}
+                                                    </div>
+                                                @endforeach
+                                            @endif
                                         </td>
                                     @else
                                         <td class="calendar-day disabled"></td>
@@ -301,26 +309,41 @@ document.addEventListener('DOMContentLoaded', function () {
 
         sessionsTableBody.innerHTML = '';
         let currentDate = new Date(start);
+        const dateFormat = (date) => date.toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' });
 
         while (currentDate <= end) {
             const dateStr = currentDate.toISOString().split('T')[0];
-            const formattedDate = currentDate.toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit'
-            });
+            const formattedDate = dateFormat(currentDate);
+            const dayOfWeek = currentDate.getDay(); // 0 = Sunday, 6 = Saturday
+            const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
 
             const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${formattedDate}</td>
-                <td>
-                    <select name="daily_sessions[]" class="session-select" data-date="${dateStr}" required>
-                        <option value="whole_day">Whole Day</option>
-                        <option value="morning">Morning (8:00am-12:00pm)</option>
-                        <option value="afternoon">Afternoon (1:00pm-5:30pm)</option>
-                    </select>
-                </td>
-            `; 
+
+            if (isWeekend) {
+                row.classList.add('weekend-row');
+                row.style.backgroundColor = '#f0f0f0';
+                row.style.color = '#999';
+                row.innerHTML = `
+                    <td>${formattedDate}</td>
+                    <td>
+                        <span class="weekend-label" style="font-style: italic; color: #aaa;">
+                            Weekend
+                        </span>
+                    </td>
+                `;
+            } else {
+                row.innerHTML = `
+                    <td>${formattedDate}</td>
+                    <td>
+                        <select name="daily_sessions[]" class="session-select" data-date="${dateStr}" required>
+                            <option value="whole_day">Whole Day</option>
+                            <option value="morning">Morning (8:00am-12:00pm)</option>
+                            <option value="afternoon">Afternoon (1:00pm-5:30pm)</option>
+                        </select>
+                    </td>
+                `;
+            }
+
             sessionsTableBody.appendChild(row);
 
             currentDate.setDate(currentDate.getDate() + 1);
@@ -338,6 +361,33 @@ document.addEventListener('DOMContentLoaded', function () {
         if (sessionSelects.length === 0) {
             e.preventDefault();
             alert('Please select start and end dates first');
+            return false;
+        }
+
+        const sessions = Array.from(sessionSelects).map(select => select.value);
+        const startDate = document.getElementById('start_date').value;
+        const endDate = document.getElementById('end_date').value;
+
+        // Count only weekdays between start and end
+        const start = new Date(startDate + 'T00:00:00');
+        const end = new Date(endDate + 'T00:00:00');
+        let weekdayCount = 0;
+        let d = new Date(start);
+        while (d <= end) {
+            const day = d.getDay();
+            if (day !== 0 && day !== 6) weekdayCount++;
+            d.setDate(d.getDate() + 1);
+        }
+
+        console.log('Form submission debug info:');
+        console.log('  Start date:', startDate);
+        console.log('  End date:', endDate);
+        console.log('  Expected weekdays (JS):', weekdayCount);
+        console.log('  Session selects found:', sessionSelects.length);
+        console.log('  Sessions:', sessions);
+
+        if (sessions.length !== weekdayCount) {
+            console.error(`Mismatch: expected ${weekdayCount} sessions but found ${sessions.length}`);
         }
     });
 

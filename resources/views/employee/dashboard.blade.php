@@ -133,14 +133,22 @@
                                 <td class="month-name">{{ $date->format('F') }}</td>
                                 @for ($day = 1; $day <= 31; $day++)
                                     @if ($day <= $daysInMonth)
-                                        @php $dayLeaves = $leaveDays[$month][$day] ?? []; @endphp
-                                        <td class="calendar-day {{ count($dayLeaves) ? 'has-leave' : '' }}">
-                                            @foreach($dayLeaves as $leave)
-                                                <div class="leave-dot {{ $leave['type'] }} {{ $leave['session'] }}">
-                                                    {{-- Optionally add a label inside the dot --}}
-                                                    {{ $leave['session'] !== 'full' ? strtoupper($leave['session'][0]) : '' }}
-                                                </div>
-                                            @endforeach
+                                        @php 
+                                            $dayLeaves = $leaveDays[$month][$day] ?? [];
+                                            $currentDate = \Carbon\Carbon::create(now()->year, $month, $day);
+                                            $isWeekend = $currentDate->isWeekend();
+                                        @endphp
+                                        <td class="calendar-day {{ count($dayLeaves) ? 'has-leave' : '' }} {{ $isWeekend ? 'weekend' : '' }}">
+                                            @if($isWeekend)
+                                                <div class="weekend-indicator" title="Weekend"></div>
+                                            @else
+                                                @foreach($dayLeaves as $leave)
+                                                    <div class="leave-dot {{ $leave['type'] }} {{ $leave['session'] }}">
+                                                        {{-- Optionally add a label inside the dot --}}
+                                                        {{ $leave['session'] !== 'full' ? strtoupper($leave['session'][0]) : '' }}
+                                                    </div>
+                                                @endforeach
+                                            @endif
                                         </td>
                                     @else
                                         <td class="calendar-day disabled"></td>
