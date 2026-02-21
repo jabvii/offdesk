@@ -454,6 +454,193 @@ h3.vacation, h3.sick, h3.emergency{
     border-radius: 4px;
     border: 1px solid #ccc;
 }
+
+.leave-history-container {
+    background: transparent;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+}
+
+.history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.history-header h2 {
+    color: white;
+    margin: 0;
+}
+
+.filter-section {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.filter-section select {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: white;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.leave-request-item {
+    background: #374151;
+    padding: 16px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-left: 4px solid #3498db;
+}
+
+.leave-request-item.approved {
+    border-left-color: #27ae60;
+}
+
+.leave-request-item.rejected {
+    border-left-color: #e74c3c;
+}
+
+.leave-request-item.cancelled {
+    border-left-color: #95a5a6;
+}
+
+.leave-request-item.pending-manager {
+    border-left-color: #f39c12;
+}
+
+.leave-request-item.pending-admin {
+    border-left-color: #e67e22;
+}
+
+.leave-request-info {
+    flex: 1;
+}
+
+.leave-request-info h4 {
+    color: white;
+    margin: 0 0 8px 0;
+    font-size: 16px;
+}
+
+.leave-request-info h4.casual { color: #3498db; }
+.leave-request-info h4.sick { color: #e74c3c; }
+.leave-request-info h4.emergency { color: #f39c12; }
+.leave-request-info h4.paternity { color: #9b59b6; }
+.leave-request-info h4.parental { color: #1abc9c; }
+.leave-request-info h4.service_incentive { color: #34495e; }
+
+.leave-request-info p {
+    color: #9ca3af;
+    margin: 4px 0;
+    font-size: 14px;
+}
+
+.leave-request-info .pdark {
+    color: #d1d5db;
+}
+
+.leave-request-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.status-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.status-approved {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-rejected {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.status-cancelled {
+    background: #e2e3e5;
+    color: #383d41;
+}
+
+.status-pending-manager {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status-pending-admin {
+    background: #ffeaa7;
+    color: #d63031;
+}
+
+.pagination {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 30px;
+}
+
+.pagination a,
+.pagination span {
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    color: white;
+    text-decoration: none;
+    background: #374151;
+}
+
+.pagination a:hover {
+    background: #4b5563;
+}
+
+.pagination .active {
+    background: #3b82f6;
+    border-color: #3b82f6;
+}
+
+.pagination .disabled {
+    color: #9ca3af;
+    cursor: not-allowed;
+}
+
+.no-requests {
+    text-align: center;
+    color: #9ca3af;
+    padding: 40px 20px;
+    font-size: 16px;
+}
+
+.remarks-section {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #4b5563;
+}
+
+.remarks-section p {
+    margin: 4px 0;
+    font-size: 13px;
+    color: #e5e7eb;
+}
+
+.remarks-label {
+    font-weight: 600;
+    color: #d1d5db;
+}
 /* Responsive Table */
 @media (max-width: 768px) {
     .requests-table th,

@@ -205,6 +205,22 @@ class LeaveRequestController extends Controller
         return back()->with('success', 'Leave request cancelled successfully.');
     }
 
+    // Show all leave request history for current user
+    public function history()
+    {
+        $user = Auth::user();
+        $currentYear = date('Y');
+
+        $allRequests = LeaveRequest::where('user_id', $user->id)
+            ->with(['leaveType', 'sessions'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(15);
+
+        $leaveTypes = LeaveType::all();
+
+        return view('employee.leave-history', compact('allRequests', 'currentYear', 'leaveTypes'));
+    }
+
     // Helper function to calculate total days from sessions
     private function calculateTotalDaysFromSessions($dailySessions): float
     {

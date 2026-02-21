@@ -34,6 +34,7 @@ Route::middleware('auth')->group(function () {
     // Leave requests
     Route::post('/leave', [LeaveRequestController::class, 'store'])->name('leave.store');
     Route::post('/leave/{id}/cancel', [LeaveRequestController::class, 'cancel'])->name('leave.cancel');
+    Route::get('/employee/leave-history', [LeaveRequestController::class, 'history'])->name('employee.leave.history');
 });
 
 // Admin Routes (auth + admin only)
@@ -64,6 +65,9 @@ Route::prefix('manager')->middleware(['auth', ManagerMiddleware::class])->group(
     Route::get('/leave-requests', [ManagerController::class, 'leaveRequests'])->name('manager.leave.requests');
     Route::post('/leave-requests/{id}/decision', [ManagerController::class, 'decision'])->name('manager.leave.decision');
     Route::get('/leave-requests/{id}/sessions', [ManagerController::class, 'getLeaveRequestSessions'])->name('manager.leave.sessions');
+    
+    // Manager's own leave history
+    Route::get('/leave-history', [LeaveRequestController::class, 'history'])->name('manager.leave.history');
 });
 
 // This will catch invalid URLs like "/dashboasd"
