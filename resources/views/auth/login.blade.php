@@ -73,11 +73,6 @@
 
             <button type="submit" class="btn btn-primary">Sign In</button>
         </form>
-
-        <div class="auth-link">
-            Don't have an account?
-            <a href="{{ route('register') }}">Sign up</a>
-        </div>
     </div>
 </div>
 

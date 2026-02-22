@@ -7,6 +7,8 @@ use App\Models\LeaveBalance;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
 use Carbon\Carbon;
 
 
@@ -20,11 +22,6 @@ public function index()
     // Total Employees (non-admin & active)
     $totalEmployees = User::where('is_admin', false)
         ->where('status', 'approved')
-        ->count();
-
-    // Pending Users (awaiting approval)
-    $pendingUsersCount = User::where('is_admin', false)
-        ->where('status', 'pending')
         ->count();
 
     // Pending Leave Requests
@@ -44,7 +41,6 @@ public function index()
 
     return view('admin.dashboard', compact(
         'totalEmployees',
-        'pendingUsersCount',
         'pendingLeaves',
         'approvedThisMonth',
         'rejectedLeaves',
@@ -124,61 +120,82 @@ public function index()
 
     public function accounts()
     {
-        // Pending users for the "Pending Accounts" table
-        $pendingUsers = User::where('status', 'pending')->get();
-        $allUsers = User::where('status', '!=', 'pending')->get();
+        // All user accounts
+        $allUsers = User::where('is_admin', false)
+                        ->orderBy('created_at', 'desc')
+                        ->get();
 
-        $pendingUsersCount = $pendingUsers->count();
         $pendingCount = LeaveRequest::where('status', 'pending_admin')->count();
 
         return view('admin.accounts', compact(
-            'pendingUsers',
             'allUsers',
-            'pendingUsersCount',
             'pendingCount'
         ));
     }
 
     public function approvedEmployees()
     {   
-        $pendingUsers = User::where('status', 'pending')->get();
-        $pendingUsersCount = $pendingUsers->count();
-        $pendingCount = LeaveRequest::where('status', 'pending')->count();
+        $pendingCount = LeaveRequest::where('status', 'pending_admin')->count();
 
         $employees = User::where('is_admin', 0)
                         ->where('status', 'approved')
+                        ->orderBy('created_at', 'desc')
                         ->get();
 
         return view('admin.approved_accounts', compact(
             'employees',
-            'pendingUsersCount',
             'pendingCount'
         ));
     }
 
-    // Approve a pending user
-    public function approveUser(User $user)
+    // Show add account form
+    public function showAddAccount()
     {
-        if ($user->id === auth()->id()) return back()->with('error', "Cannot approve yourself.");
+        $managers = User::where('role', 'manager')
+            ->where('status', 'approved')
+            ->get();
 
-        $user->update([
-            'status' => 'approved',
+        return view('admin.add-account', compact('managers'));
+    }
+
+    // Store new account created by admin
+    public function storeAccount(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', 'unique:users'],
+            'password' => ['required', 'confirmed', Password::min(8)],
+            'department' => ['required', 'string', 'in:IT,Accounting,HR,Treasury,Sales,Planning,Visual,Engineering'],
+            'role' => ['required', 'string', 'in:employee,manager'],
+            'manager_id' => ['nullable', 'exists:users,id'],
+        ]);
+
+        // If role is employee but no manager selected, auto-assign from department
+        if ($validated['role'] === 'employee' && !$validated['manager_id']) {
+            $manager = User::where('department', $validated['department'])
+                ->where('role', 'manager')
+                ->where('status', 'approved')
+                ->first();
+
+            if ($manager) {
+                $validated['manager_id'] = $manager->id;
+            }
+        }
+
+        $user = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+            'department' => $validated['department'],
+            'role' => $validated['role'],
+            'manager_id' => $validated['manager_id'] ?? null,
+            'is_admin' => false,
+            'status' => 'approved',  // Admin-created accounts are auto-approved
             'is_approved' => true,
         ]);
 
-        return back()->with('success', "{$user->name} approved!");
-    }
-
-    public function rejectUser(User $user)
-    {
-        if ($user->id === auth()->id()) return back()->with('error', "Cannot reject yourself.");
-
-        $user->update([
-            'status' => 'rejected',
-            'is_approved' => false,
-        ]);
-
-        return back()->with('success', "{$user->name} rejected!");
+        $message = ucfirst($validated['role']) . " account for {$user->name} created successfully!";
+        return redirect()->route('admin.accounts')->with('success', $message);
     }
 
 

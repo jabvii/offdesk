@@ -15,9 +15,9 @@
         <div class="nav-top">
             <h2>OFFDesk GUESS</h2>
             <ul class="nav-links">
-                <li><a href="{{ route(name: 'admin.dashboard') }}">Dashboard</a></li>
+                <li><a href="{{ route('admin.dashboard') }}" @if(request()->routeIs('admin.dashboard')) class="active" @endif>Dashboard</a></li>
                 <li>
-                    <a href="{{ route('admin.leave.requests') }}" class="active">
+                    <a href="{{ route('admin.leave.requests') }}" @if(request()->routeIs('admin.leave.requests')) class="active" @endif>
                         Requests
                         @if($pendingCount > 0)
                             <span class="badge">{{ $pendingCount }}</span>
@@ -25,13 +25,15 @@
                     </a>
                 </li>
                 <li>
-                    <a href="{{ route('admin.accounts') }}">
+                    <a href="{{ route('admin.accounts') }}" @if(request()->routeIs('admin.accounts')) class="active" @endif>
                         Accounts
                         @if($pendingUsersCount > 0)
                             <span class="badge">{{ $pendingUsersCount }}</span>
                         @endif
                     </a>
                 </li>
+                <li><a href="{{ route('admin.add.account') }}" @if(request()->routeIs('admin.add.account')) class="active" @endif>Add Account</a></li>
+                <li><a href="{{ route('admin.approved_accounts') }}" @if(request()->routeIs('admin.approved_accounts')) class="active" @endif>Approved Users</a></li>
             </ul>
         </div>
         <div class="nav-bottom">

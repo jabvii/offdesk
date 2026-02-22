@@ -17,8 +17,6 @@ Route::get('/', function () {
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'login']);
-    Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
-    Route::post('/register', [AuthController::class, 'register']);
 });
 
 // Logout Route (auth only)
@@ -47,12 +45,13 @@ Route::prefix('admin')->middleware(['auth', AdminMiddleware::class])->group(func
     Route::post('/employee/leave-requests/{id}/decision', [AdminController::class, 'decision'])->name('admin.leave.decision');
     Route::get('/employee/leave-requests/{id}/sessions', [AdminController::class, 'getLeaveRequestSessions'])->name('admin.leave.sessions');
 
-    // User account approvals
+    // User account management
     Route::get('/accounts', [AdminController::class, 'accounts'])->name('admin.accounts');
-    Route::post('/users/{user}/approve', [AdminController::class, 'approveUser'])->name('admin.users.approve');
-    Route::post('/users/{user}/reject', [AdminController::class, 'rejectUser'])->name('admin.users.reject');
-
     Route::get('approved', [AdminController::class, 'approvedEmployees'])->name('admin.approved_accounts');
+
+    // Add account
+    Route::get('/add-account', [AdminController::class, 'showAddAccount'])->name('admin.add.account');
+    Route::post('/add-account', [AdminController::class, 'storeAccount'])->name('admin.store.account');
 
 });
 
