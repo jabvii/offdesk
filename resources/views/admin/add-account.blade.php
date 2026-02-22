@@ -218,7 +218,7 @@
                     <p>Add a new manager or employee account</p>
                 </div>
 
-                <form method="POST" action="{{ route('admin.store.account') }}">
+                <form method="POST" action="{{ route('admin.store.account') }}" onsubmit="return confirmCreateAccount()">
                     @csrf
 
                     <!-- Name -->
@@ -279,7 +279,7 @@
                     <!-- Department -->
                     <div class="form-group">
                         <label for="department">Department</label>
-                        <select name="department" id="department" required>
+                        <select name="department" id="department" required onchange="filterManagersByDepartment()">
                             <option value="">Select Department</option>
                             <option value="IT" @selected(old('department') === 'IT')>IT</option>
                             <option value="Accounting" @selected(old('department') === 'Accounting')>Accounting</option>
@@ -308,7 +308,7 @@
                         <select name="manager_id" id="manager_id">
                             <option value="">Auto-assign from department</option>
                             @foreach($managers as $manager)
-                                <option value="{{ $manager->id }}" @selected(old('manager_id') == $manager->id)>
+                                <option value="{{ $manager->id }}" data-department="{{ $manager->department }}" @selected(old('manager_id') == $manager->id)>
                                     {{ $manager->name }} ({{ $manager->department }})
                                 </option>
                             @endforeach
@@ -336,6 +336,20 @@ function confirmLogout() {
     return confirm('Are you sure you want to logout?');
 }
 
+function confirmCreateAccount() {
+    const name = document.getElementById('name').value;
+    const role = document.getElementById('role').value;
+    const department = document.getElementById('department').value;
+    
+    if (!name || !role || !department) {
+        alert('Please fill in all required fields.');
+        return false;
+    }
+    
+    const message = `Are you sure you want to create a ${role} account for ${name} in ${department}?`;
+    return confirm(message);
+}
+
 function toggleManagerField() {
     const roleSelect = document.getElementById('role');
     const managerField = document.getElementById('managerField');
@@ -353,9 +367,46 @@ function toggleManagerField() {
     }
 }
 
+function filterManagersByDepartment() {
+    const departmentSelect = document.getElementById('department');
+    const managerSelect = document.getElementById('manager_id');
+    const selectedDepartment = departmentSelect.value;
+
+    const allOptions = managerSelect.querySelectorAll('option');
+
+    // Reset to auto-assign option
+    managerSelect.value = '';
+
+    let visibleCount = 1; // Start at 1 for the "Auto-assign" option
+
+    allOptions.forEach((option, index) => {
+        if (index === 0) return; // Skip the "Auto-assign" option
+
+        const managerDepartment = option.getAttribute('data-department');
+
+        // Show managers matching the selected department
+        if (managerDepartment === selectedDepartment) {
+            option.style.display = '';
+            visibleCount++;
+        } else {
+            option.style.display = 'none';
+        }
+    });
+
+    // If only auto-assign option is visible, show a message
+    if (visibleCount === 1 && selectedDepartment) {
+        // No matching managers found, will use auto-assign
+    }
+}
+
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
     toggleManagerField();
+    // Filter managers if department was already selected (e.g., on validation error)
+    const department = document.getElementById('department').value;
+    if (department) {
+        filterManagersByDepartment();
+    }
 });
 </script>
 </body>
