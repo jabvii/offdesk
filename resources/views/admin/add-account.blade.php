@@ -5,165 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>OffDesk - Add Account</title>
-    <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
-    <style>
-        .add-account-container {
-            background: #1f2937;
-            padding: 30px;
-            border-radius: 8px;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        .add-account-header {
-            margin-bottom: 30px;
-        }
-
-        .add-account-header h2 {
-            color: white;
-            margin: 0 0 10px 0;
-        }
-
-        .add-account-header p {
-            color: #9ca3af;
-            margin: 0;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: white;
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        .form-group input,
-        .form-group select {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #4b5563;
-            border-radius: 6px;
-            background: #374151;
-            color: white;
-            font-size: 14px;
-            font-family: inherit;
-        }
-
-        .form-group input::placeholder {
-            color: #9ca3af;
-        }
-
-        .form-group select option {
-            background: #1f2937;
-            color: white;
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-
-        .form-row .form-group {
-            margin-bottom: 0;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus {
-            outline: none;
-            border-color: #3b82f6;
-            background: #2d3748;
-        }
-
-        .form-group small {
-            display: block;
-            margin-top: 5px;
-            color: #9ca3af;
-            font-size: 12px;
-        }
-
-        .form-actions {
-            display: flex;
-            gap: 12px;
-            justify-content: flex-end;
-            margin-top: 30px;
-        }
-
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-
-        .btn-primary {
-            background: #3b82f6;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #2563eb;
-        }
-
-        .btn-secondary {
-            background: #6b7280;
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background: #4b5563;
-        }
-
-        .alert {
-            padding: 12px 16px;
-            border-radius: 6px;
-            margin-bottom: 20px;
-        }
-
-        .alert-error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        .alert-success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .error-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .error-list li {
-            padding: 4px 0;
-        }
-
-        .manager-note {
-            background: #374151;
-            padding: 12px;
-            border-left: 4px solid #3b82f6;
-            border-radius: 4px;
-            margin-bottom: 20px;
-            color: #d1d5db;
-            font-size: 13px;
-            display: none;
-        }
-
-        .manager-note.show {
-            display: block;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ asset('css/shared/globals.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/shared/sidebar.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/shared/buttons.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/shared/alerts.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/shared/modals.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/shared/forms.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/admin/accounts.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/admin/add-account.css') }}">
 </head>
 <body>
 <div class="dashboard-container">
@@ -176,7 +25,6 @@
                 <li><a href="{{ route('admin.leave.requests') }}" @if(request()->routeIs('admin.leave.requests')) class="active" @endif>Requests</a></li>
                 <li><a href="{{ route('admin.accounts') }}" @if(request()->routeIs('admin.accounts')) class="active" @endif>Accounts</a></li>
                 <li><a href="{{ route('admin.add.account') }}" @if(request()->routeIs('admin.add.account')) class="active" @endif>Add Account</a></li>
-                <li><a href="{{ route('admin.approved_accounts') }}" @if(request()->routeIs('admin.approved_accounts')) class="active" @endif>Approved Users</a></li>
             </ul>
         </div>
         <div class="nav-bottom">
@@ -322,7 +170,6 @@
 
                     <!-- Form Actions -->
                     <div class="form-actions">
-                        <a href="{{ route('admin.accounts') }}" class="btn btn-secondary">Cancel</a>
                         <button type="submit" class="btn btn-primary">Create Account</button>
                     </div>
                 </form>

@@ -1,0 +1,50 @@
+/* Auth - Login and Register Styles */
+
+.auth-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.auth-box {
+    background: #2c3e50cc;
+    border: 2px solid #2c3e50cc;
+    box-shadow: 20px 30px rgba(0, 0, 0, 0.4);
+    padding: 40px;
+    width: 100%;
+    max-width: 420px;
+    border-radius: 8px;
+}
+
+.auth-box h1 {
+    color: white;
+    margin-bottom: 8px;
+    text-align: center;
+    font-size: 28px;
+}
+
+.auth-box .subtitle {
+    text-align: center;
+    color: #ffffff86;
+    margin-bottom: 32px;
+    font-size: 14px;
+}
+
+.auth-link {
+    text-align: center;
+    margin-top: 20px;
+    color: #ffffff86;
+    font-size: 14px;
+}
+
+.auth-link a {
+    color: white;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.auth-link a:hover {
+    text-decoration: underline;
+}

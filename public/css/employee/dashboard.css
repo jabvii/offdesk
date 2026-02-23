@@ -1,0 +1,275 @@
+/* Employee Dashboard Styles */
+
+.balance-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.balance-card {
+    background: #1f2937;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+.balance-card h3 {
+    font-size: 18px;
+    margin-bottom: 16px;
+}
+
+.balance-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.balance-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid black;
+}
+
+.balance-row:last-child {
+    border-bottom: none;
+}
+
+.balance-label {
+    color: white;
+    font-size: 14px;
+}
+
+.balance-value {
+    font-weight: 600;
+    color: white;
+}
+
+.balance-value.available {
+    color: #27ae60;
+}
+
+/* Calendar Styles */
+.calendar-section {
+    background: #1f2937;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.calendar-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.calendar-header h2 {
+    color: white;
+    padding-top: 14px;
+    font-size: 22px;
+}
+
+.calendar-table-wrapper {
+    overflow-x: auto;
+}
+
+.calendar-table {
+    border-collapse: collapse;
+    table-layout: fixed;
+    width: 100%;
+}
+
+.calendar-table th:not(:first-child),
+.calendar-table td:not(:first-child) {
+    color: #1f2937;
+    width: 36px;
+    min-width: 32px;
+    max-width: 36px;
+    padding: 0;
+}
+
+.calendar-table th,
+.calendar-table td {
+    border: 1px solid #7070708f;
+    color: #1f2937;
+    padding: 6px;
+    font-size: 12px;
+    text-align: center;
+}
+
+.calendar-table th {
+    background: #f8f9fa;
+    font-weight: 600;
+}
+
+.month-name {
+    background: #f5f5f5;
+    font-weight: bold;
+    text-align: left;
+    padding-left: 10px;
+}
+
+.calendar-day {
+    width: 32px;
+    height: 32px;
+    background: #f4f6f8;
+    aspect-ratio: 1 / 1;
+    cursor: pointer;
+    position: relative;
+}
+
+.calendar-day:hover {
+    opacity: 0.8;
+}
+
+.calendar-day.disabled {
+    background: linear-gradient(45deg, #e8e8e8 25%, #d0d0d0 25%, #d0d0d0 50%, #e8e8e8 50%, #e8e8e8 75%, #d0d0d0 75%, #d0d0d0);
+    background-size: 8px 8px;
+    cursor: default;
+    opacity: 0.85;
+}
+
+.leave-dot {
+    width: 100%;
+    height: 100%;
+    font-size: 10px;
+    font-weight: bold;
+    color: white;
+}
+
+.leave-dot.vacation {
+    background: #3498db;
+}
+
+.leave-dot.sick {
+    background: #e74c3c;
+}
+
+.leave-dot.emergency {
+    background: #f39c12;
+}
+
+.leave-dot.paternity {
+    background: #9b59b6;
+}
+
+.leave-dot.parental {
+    background: #1abc9c;
+}
+
+.leave-dot.service_incentive {
+    background: #34495e;
+}
+
+/* Weekend styling */
+.calendar-day.weekend {
+    background: rgba(240, 240, 240, 0.523);
+    position: relative;
+    border: unset;
+}
+
+.calendar-day.weekend:hover {
+    opacity: 0.9;
+}
+
+.weekend-indicator {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    color: rgba(233, 233, 233, 0.129);
+    font-weight: bold;
+}
+
+/* Leave Requests List */
+.leave-requests-list {
+    margin-top: 30px;
+}
+
+.leave-requests-list h2 {
+    margin-bottom: 16px;
+    color: white;
+}
+
+.leave-request-item {
+    background: #1f2937;
+    padding: 16px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.leave-request-info h4 {
+    color: white;
+    margin-bottom: 4px;
+}
+
+.leave-request-info p {
+    color: white;
+    font-size: 14px;
+}
+
+.leave-request-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.status-badge {
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: white;
+    white-space: nowrap;
+}
+
+.status-pending {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status-approved {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-cancelled {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.status-rejected {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+@media (max-width: 768px) {
+    .balance-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .calendar {
+        gap: 4px;
+    }
+
+    .calendar-day {
+        padding: 4px;
+        font-size: 12px;
+    }
+
+    .leave-request-item {
+        flex-direction: column;
+        gap: 12px;
+        align-items: stretch;
+    }
+
+    .leave-request-actions {
+        justify-content: flex-end;
+    }
+}

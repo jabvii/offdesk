@@ -6,7 +6,12 @@
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <title>OffDesk - Accounts</title>
 
-<link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
+<link rel="stylesheet" href="{{ asset('css/shared/globals.css') }}">
+<link rel="stylesheet" href="{{ asset('css/shared/sidebar.css') }}">
+<link rel="stylesheet" href="{{ asset('css/shared/buttons.css') }}">
+<link rel="stylesheet" href="{{ asset('css/shared/alerts.css') }}">
+<link rel="stylesheet" href="{{ asset('css/shared/modals.css') }}">
+<link rel="stylesheet" href="{{ asset('css/shared/forms.css') }}">
 <link rel="stylesheet" href="{{ asset('css/admin/accounts.css') }}">
 
 </head>
@@ -29,7 +34,6 @@
                 </li>
                 <li><a href="{{ route('admin.accounts') }}" @if(request()->routeIs('admin.accounts')) class="active" @endif>Accounts</a></li>
                 <li><a href="{{ route('admin.add.account') }}" @if(request()->routeIs('admin.add.account')) class="active" @endif>Add Account</a></li>
-                <li><a href="{{ route('admin.approved_accounts') }}" @if(request()->routeIs('admin.approved_accounts')) class="active" @endif>Approved Users</a></li>
             </ul>
         </div>
 

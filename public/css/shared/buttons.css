@@ -1,0 +1,83 @@
+/* Button Styles */
+.btn {
+    padding: 8px 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.btn-primary {
+    background: #2c3e50cc;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #2c3e50;
+}
+
+.btn-danger {
+    background: #e74c3c;
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #c0392b;
+}
+
+.btn-secondary {
+    background: #e74d3cc9;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #c0392b;
+}
+
+/* Auth Buttons */
+.btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s;
+    width: 100%;
+    margin-top: 8px;
+}
+
+.btn-primary {
+    background: #0000005d;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #0000009c;
+}
+
+/* Admin action buttons */
+.conf-btn, .canc-btn {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.canc-btn {
+    background-color: #dc3545;
+}
+
+.conf-btn:hover, .canc-btn:hover {
+    opacity: 0.8;
+}
+
+.admin-action-btn {
+    padding: 6px 10px;
+    margin: 2px;
+    cursor: pointer;
+}

@@ -5,7 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>OffDesk - Admin Dashboard</title>
-    <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/shared/globals.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/shared/sidebar.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/shared/buttons.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/shared/alerts.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/shared/modals.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/shared/forms.css') }}">
     <link rel="stylesheet" href="{{ asset('css/admin/dashboard.css') }}">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
 
@@ -42,11 +47,6 @@
                 <li>
                     <a href="{{ route('admin.add.account') }}" @if(request()->routeIs('admin.add.account')) class="active" @endif>
                         Add Account
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('admin.approved_accounts') }}" @if(request()->routeIs('admin.approved_accounts')) class="active" @endif>
-                        Approved Users
                     </a>
                 </li>
             </ul>

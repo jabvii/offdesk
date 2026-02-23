@@ -5,7 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Sign In - OffDesk</title>
-    <link rel="stylesheet" href="{{ asset('css/auth.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/shared/globals.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/shared/buttons.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/shared/alerts.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/shared/modals.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/shared/forms.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/auth/auth.css') }}">
 </head>
 <body>
 

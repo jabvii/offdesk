@@ -6,7 +6,12 @@
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <title>OffDesk - Accounts</title>
 
-<link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
+<link rel="stylesheet" href="{{ asset('css/shared/globals.css') }}">
+<link rel="stylesheet" href="{{ asset('css/shared/sidebar.css') }}">
+<link rel="stylesheet" href="{{ asset('css/shared/buttons.css') }}">
+<link rel="stylesheet" href="{{ asset('css/shared/alerts.css') }}">
+<link rel="stylesheet" href="{{ asset('css/shared/modals.css') }}">
+<link rel="stylesheet" href="{{ asset('css/shared/forms.css') }}">
 <link rel="stylesheet" href="{{ asset('css/admin/accounts.css') }}">
 
 </head>
