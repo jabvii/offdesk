@@ -6,18 +6,47 @@
 .acc {
     padding-top: 20px;
 }
+
+.accounts-table-wrapper {
+    overflow-x: auto;
+}
+
 table {
     width: 100%;
     border-collapse: collapse;
+    background: #1f2937;
+    border-radius: 8px;
+    overflow: hidden;
 }
-table th, table td {
-    padding: 4px 8px;
-    background-color: white;
-    border: 1px solid #ccc;
+
+table th,
+table td {
+    padding: 14px 16px;
+    text-align: left;
+    border-bottom: 1px solid #374151;
 }
-table th{
-    background-color: #1f2937;
-    color: white
+
+table th {
+    background: #374151;
+    color: #d1d5db;
+    font-weight: 600;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+table td {
+    color: #e5e7eb;
+    font-size: 14px;
+    background: transparent;
+}
+
+table tbody tr:hover {
+    background: #374151;
+}
+
+table tbody tr:last-child td {
+    border-bottom: none;
 }
 
 .status-badge {

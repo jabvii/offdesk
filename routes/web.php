@@ -50,6 +50,7 @@ Route::prefix('admin')->middleware(['auth', AdminMiddleware::class])->group(func
     // User account management
     Route::get('/accounts', [AdminController::class, 'accounts'])->name('admin.accounts');
     Route::get('approved', [AdminController::class, 'approvedEmployees'])->name('admin.approved_accounts');
+    Route::get('/approved-this-month', [AdminController::class, 'approvedThisMonth'])->name('admin.approved.this.month');
 
     // Add account
     Route::get('/add-account', [AdminController::class, 'showAddAccount'])->name('admin.add.account');
@@ -69,6 +70,9 @@ Route::prefix('manager')->middleware(['auth', ManagerMiddleware::class])->group(
     
     // Manager's own leave history
     Route::get('/leave-history', [LeaveRequestController::class, 'history'])->name('manager.leave.history');
+    
+    // View team members
+    Route::get('/team', [ManagerController::class, 'viewTeam'])->name('manager.team');
 });
 
 // Supervisor Routes (auth + supervisor only)

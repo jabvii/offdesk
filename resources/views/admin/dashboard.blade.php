@@ -103,6 +103,8 @@
                 <i class="fas fa-arrow-right arrow-icon"></i>
             </div>
             </a>
+
+            <a href="{{ route('admin.approved.this.month') }}" class="card-link">
             <div class="card blue">
                 <h3>
                     <i class="fas fa-check-circle"></i>
@@ -111,7 +113,9 @@
                 <p>Approved Requests <br>(This Month)</p>
                 <i class="fas fa-arrow-right arrow-icon"></i>
             </div>
+            </a>
 
+            <div class="card-wrapper">
             <div class="card red">
                 <h3>
                     <i class="fas fa-times-circle"></i>
@@ -120,7 +124,9 @@
                 <p>Rejected Leaves</p>
                 <i class="fas fa-arrow-right arrow-icon"></i>
             </div>
+            </div>
 
+            <div class="card-wrapper">
             <div class="card purple">
                 <h3>
                     <i class="fas fa-calendar-alt"></i>
@@ -128,6 +134,7 @@
                 </h3>
                 <p>Total Requests <br>(This Year)</p>
                 <i class="fas fa-arrow-right arrow-icon"></i>
+            </div>
             </div>
 
         </div>

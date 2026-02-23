@@ -23,6 +23,7 @@
                 <li><a href="{{ route('manager.dashboard') }}" @if(request()->routeIs('manager.dashboard')) class="active" @endif>Dashboard</a></li>
                 <li><a href="#" id="openLeaveModalLink">Request Leave</a></li>
                 <li><a href="{{ route('manager.leave.requests') }}" @if(request()->routeIs('manager.leave.requests')) class="active" @endif>Requests</a></li>
+                <li><a href="{{ route('manager.team') }}" @if(request()->routeIs('manager.team')) class="active" @endif>View Team</a></li>
                 <li><a href="{{ route('manager.leave.history') }}" @if(request()->routeIs('manager.leave.history')) class="active" @endif>Leave History</a></li>
             </ul>
         </div>

@@ -113,24 +113,43 @@
     overflow-x: auto;
     margin-top: 20px;
 }
+
 .requests-table {
     width: 100%;
     border-collapse: collapse;
-    font-family: inherit;
+    background: #1f2937;
+    border-radius: 8px;
+    overflow: hidden;
 }
+
 .requests-table th,
 .requests-table td {
-    background-color: white;
-    padding: 4px 16px;
-    font-size: 14px;
+    padding: 14px 16px;
+    text-align: left;
+    border-bottom: 1px solid #374151;
+}
 
-}
 .requests-table th {
-    background-color: #1f2937 ;
-    color: white;
+    background: #374151;
+    color: #d1d5db;
+    font-weight: 600;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
-.requests-table tr:hover { 
-    background-color: #f1f5f9;
+
+.requests-table td {
+    color: #e5e7eb;
+    font-size: 14px;
+    background: transparent;
+}
+
+.requests-table tbody tr:hover {
+    background: #374151;
+}
+
+.requests-table tbody tr:last-child td {
+    border-bottom: none;
 } 
 .requests-table td form {
     display: inline-block;
@@ -154,4 +173,43 @@
 }
 .requests-table td button[type="submit"]:last-child:hover {
     background-color: #c0392b;
+}
+
+/* Leave Type Badges */
+.leave-type-badge {
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.leave-type-badge.vacation {
+    background: rgba(52, 152, 219, 0.2);
+    color: #3498db;
+}
+
+.leave-type-badge.sick {
+    background: rgba(231, 76, 60, 0.2);
+    color: #e74c3c;
+}
+
+.leave-type-badge.emergency {
+    background: rgba(243, 156, 18, 0.2);
+    color: #f39c12;
+}
+
+.leave-type-badge.paternity {
+    background: rgba(155, 89, 182, 0.2);
+    color: #9b59b6;
+}
+
+.leave-type-badge.parental {
+    background: rgba(26, 188, 156, 0.2);
+    color: #1abc9c;
+}
+
+.leave-type-badge.service_incentive {
+    background: rgba(149, 165, 166, 0.2);
+    color: #95a5a6;
 }

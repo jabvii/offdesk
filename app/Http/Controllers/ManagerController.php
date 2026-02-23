@@ -146,4 +146,31 @@ class ManagerController extends Controller
             })->toArray(),
         ]);
     }
+
+    // View team members (supervisors and employees in manager's department)
+    public function viewTeam()
+    {
+        $manager = Auth::user();
+        
+        // Get count for sidebar badge
+        $pendingCount = LeaveRequest::whereIn('status', ['pending_supervisor', 'pending_manager', 'supervisor_approved_pending_manager'])
+            ->whereIn('user_id', User::where('manager_id', $manager->id)->pluck('id'))
+            ->count();
+
+        // Get all team members in the same department (excluding the manager themselves)
+        $teamMembers = User::where('department', $manager->department)
+            ->where('id', '!=', $manager->id)
+            ->where('is_admin', false)
+            ->where('status', 'approved')
+            ->with(['supervisor', 'manager'])
+            ->orderBy('role', 'asc')
+            ->orderBy('name', 'asc')
+            ->get();
+
+        // Separate by role for display
+        $supervisors = $teamMembers->where('role', 'supervisor');
+        $employees = $teamMembers->where('role', 'employee');
+
+        return view('manager.team', compact('supervisors', 'employees', 'pendingCount', 'manager'));
+    }
 }

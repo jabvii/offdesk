@@ -149,6 +149,30 @@ public function index()
         ));
     }
 
+    // Show approved leave requests this month
+    public function approvedThisMonth()
+    {
+        $currentYear = Carbon::now()->year;
+        $currentMonth = Carbon::now()->month;
+        
+        $pendingCount = LeaveRequest::where('status', 'pending_admin')->count();
+        
+        $approvedRequests = LeaveRequest::with(['user', 'leaveType'])
+            ->where('status', 'approved')
+            ->whereYear('start_date', $currentYear)
+            ->whereMonth('start_date', $currentMonth)
+            ->orderBy('updated_at', 'desc')
+            ->get();
+        
+        $monthName = Carbon::now()->format('F Y');
+        
+        return view('admin.approved-this-month', compact(
+            'approvedRequests',
+            'pendingCount',
+            'monthName'
+        ));
+    }
+
     // Show add account form
     public function showAddAccount()
     {
