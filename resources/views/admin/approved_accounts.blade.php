@@ -38,7 +38,6 @@
                     </a>
                 </li>
                 <li><a href="{{ route('admin.add.account') }}" @if(request()->routeIs('admin.add.account')) class="active" @endif>Add Account</a></li>
-                <li><a href="{{ route('admin.approved_accounts') }}" @if(request()->routeIs('admin.approved_accounts')) class="active" @endif>Approved Users</a></li>
             </ul>
         </div>
 

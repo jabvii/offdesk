@@ -98,38 +98,38 @@
     max-width: 90%;
 }
 
-/* Leave Request Form Two Column Layout */
-.leave-request-form-wrapper {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 25px;
+#sessionsTableContainer {
+    margin-top: 20px;
 }
 
-.leave-request-form-left {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+#sessionsTableContainer label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 600;
+    color: #2c3e50;
 }
 
-.leave-request-form-right {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+#sessionsTableContainer table {
+    width: 100%;
+    border-collapse: collapse;
 }
 
-.leave-request-form-left .form-group,
-.leave-request-form-right .form-group {
-    margin-bottom: 0;
+#sessionsTableContainer th,
+#sessionsTableContainer td {
+    padding: 12px;
+    border: 1px solid #ddd;
+    text-align: left;
 }
 
-.sessionsTableContainer {
-    grid-column: 1 / -1;
-    margin-top: 10px;
+#sessionsTableContainer th {
+    background-color: #f1f5f9;
+    font-weight: 600;
+    color: #2c3e50;
 }
 
-@media (max-width: 700px) {
-    .leave-request-form-wrapper {
-        grid-template-columns: 1fr;
-        gap: 16px;
-    }
+#sessionsTableContainer select {
+    padding: 6px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
 }
