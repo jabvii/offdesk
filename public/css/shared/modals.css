@@ -20,7 +20,7 @@
     background: white;
     padding: 32px;
     border: 3px solid #2c3e50;
-    max-width: 500px;
+    max-width: 750px;
     width: 90%;
     max-height: 90vh;
     overflow-y: auto;
@@ -30,16 +30,21 @@
 
 .modal-header {
     margin-bottom: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
 }
 
 .modal-header h2 {
     color: #2c3e50;
     font-size: 24px;
+    margin: 0;
 }
 
 .modal-header h3 {
     color: #2c3e50;
-    margin-bottom: 12px;
+    margin: 0;
     font-size: 22px;
 }
 
@@ -57,13 +62,8 @@
     font-size: 14px;
     font-weight: 600;
     transition: all 0.3s;
-    width: 100%;
     background: #2c3e50cc;
     color: white;
-}
-
-.modal-content button:hover {
-    background: #2c3e50;
 }
 
 .modal-actions {
@@ -96,4 +96,40 @@
     border-radius: 8px;
     width: 400px;
     max-width: 90%;
+}
+
+/* Leave Request Form Two Column Layout */
+.leave-request-form-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+}
+
+.leave-request-form-left {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.leave-request-form-right {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.leave-request-form-left .form-group,
+.leave-request-form-right .form-group {
+    margin-bottom: 0;
+}
+
+.sessionsTableContainer {
+    grid-column: 1 / -1;
+    margin-top: 10px;
+}
+
+@media (max-width: 700px) {
+    .leave-request-form-wrapper {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
 }

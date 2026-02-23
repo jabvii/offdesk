@@ -173,7 +173,7 @@
     <div class="modal-content">
         <div class="modal-header">
             <h3>Daily Sessions</h3>
-            <button type="button" class="close-sessions-btn" style="border: none; background: none; font-size: 20px; cursor: pointer;">&times;</button>
+            <button type="button" class="close-sessions-btn">&times;</button>
         </div>
         <table border="1" cellpadding="8" cellspacing="0" style="width: 100%; margin-top: 10px;">
             <thead>

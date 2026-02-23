@@ -156,7 +156,7 @@
     <div class="modal-content">
         <div class="modal-header">
             <h3>Daily Sessions</h3>
-            <button type="button" class="close-sessions-btn" style="border: none; background: none; font-size: 20px; cursor: pointer;">&times;</button>
+            <button type="button" class="close-sessions-btn">&times;</button>
         </div>
         <table border="1" cellpadding="8" cellspacing="0" style="width: 100%; margin-top: 10px;">
             <thead>
@@ -165,7 +165,7 @@
                     <th>Session</th>
                 </tr>
             </thead>
-            <tbody id="sessionsTableBody">
+            <tbody id="sessionsTableBodyModal">
             </tbody>
         </table>
     </div>
@@ -183,7 +183,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('adminActionForm');
     const statusInput = document.getElementById('adminActionStatus');
     const remarks = document.getElementById('adminRemarks');
-    const sessionsTableBody = document.getElementById('sessionsTableBody');
+    const sessionsTableBodyModal = document.getElementById('sessionsTableBodyModal');
 
     // Handle Approve/Reject buttons
     document.querySelectorAll('.admin-action-btn').forEach(button => {
@@ -227,7 +227,7 @@ document.addEventListener('DOMContentLoaded', function() {
             fetch(`/admin/employee/leave-requests/${leaveId}/sessions`)
                 .then(response => response.json())
                 .then(data => {
-                    sessionsTableBody.innerHTML = '';
+                    sessionsTableBodyModal.innerHTML = '';
 
                     const startDate = new Date(data.start_date + 'T00:00:00');
                     const endDate = new Date(data.end_date + 'T00:00:00');
@@ -272,7 +272,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             `;
                         }
 
-                        sessionsTableBody.appendChild(row);
+                        sessionsTableBodyModal.appendChild(row);
                         currentDate.setDate(currentDate.getDate() + 1);
                     }
 

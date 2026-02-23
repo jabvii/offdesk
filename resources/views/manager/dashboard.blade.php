@@ -226,24 +226,38 @@
         </div>
         <form action="{{ route('leave.store') }}" method="POST" id="leaveRequestForm">
             @csrf
-            <div class="form-group">
-                <label for="leave_type_id">Leave Type</label>
-                <select name="leave_type_id" id="leave_type_id" required>
-                    <option value="">Select Leave Type</option>
-                    @forelse($leaveTypes as $type)
-                        <option value="{{ $type->id }}">{{ $type->name }}</option>
-                    @empty
-                        <option value="">No leave types available</option>
-                    @endforelse
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="start_date">Start Date</label>
-                <input type="date" name="start_date" id="start_date" required>
-            </div>
-            <div class="form-group">
-                <label for="end_date">End Date</label>
-                <input type="date" name="end_date" id="end_date" required>
+            <div class="leave-request-form-wrapper">
+                <!-- LEFT COLUMN -->
+                <div class="leave-request-form-left">
+                    <div class="form-group">
+                        <label for="leave_type_id">Leave Type</label>
+                        <select name="leave_type_id" id="leave_type_id" required>
+                            <option value="">Select Leave Type</option>
+                            @forelse($leaveTypes as $type)
+                                <option value="{{ $type->id }}">{{ $type->name }}</option>
+                            @empty
+                                <option value="">No leave types available</option>
+                            @endforelse
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="reason">Reason</label>
+                        <textarea name="reason" id="reason" required></textarea>
+                    </div>
+                </div>
+
+                <!-- RIGHT COLUMN -->
+                <div class="leave-request-form-right">
+                    <div class="form-group">
+                        <label for="start_date">Start Date</label>
+                        <input type="date" name="start_date" id="start_date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="end_date">End Date</label>
+                        <input type="date" name="end_date" id="end_date" required>
+                    </div>
+                </div>
             </div>
             
             <!-- Daily Sessions Table -->
@@ -261,10 +275,6 @@
                 </table>
             </div>
 
-            <div class="form-group">
-                <label for="reason">Reason</label>
-                <textarea name="reason" id="reason" required></textarea>
-            </div>
             <div class="form-actions">
                 <button type="submit" class="btn btn-primary">Submit Request</button>
                 <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>

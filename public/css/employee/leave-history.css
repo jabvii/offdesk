@@ -117,11 +117,13 @@
 }
 
 .status-badge {
-    padding: 6px 12px;
-    border-radius: 20px;
+    padding: 6px 6px;
+    border-radius: 4px;
     font-size: 12px;
     font-weight: 600;
     white-space: nowrap;
+    min-width: 50px;
+    text-align: center;
 }
 
 .status-approved {

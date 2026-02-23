@@ -80,4 +80,25 @@
     padding: 6px 10px;
     margin: 2px;
     cursor: pointer;
+    border: none;
+    border-radius: 4px;
+    font-weight: 600;
+    transition: all 0.3s;
+    color: white;
+}
+
+.admin-action-btn[data-action="approved"] {
+    background-color: #27ae60;
+}
+
+.admin-action-btn[data-action="approved"]:hover {
+    background-color: #229954;
+}
+
+.admin-action-btn[data-action="rejected"] {
+    background-color: #e74c3c;
+}
+
+.admin-action-btn[data-action="rejected"]:hover {
+    background-color: #c0392b;
 }
