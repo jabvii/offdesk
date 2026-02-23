@@ -21,7 +21,7 @@
     <!-- Sidebar -->
     <nav class="sidebar">
         <div class="nav-top">
-            <h2>OFFDesk GUESS</h2>
+            <h2>OFFDesk Admin</h2>
             <ul class="nav-links">
                 <li>
                     <a href="{{ route('admin.dashboard') }}" @if(request()->routeIs('admin.dashboard')) class="active" @endif>

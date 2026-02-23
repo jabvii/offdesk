@@ -139,8 +139,23 @@ class LeaveRequestController extends Controller
 
         // Store leave request with sessions
         DB::transaction(function () use ($validated, $user, $totalDays, $balance, $start, $end) {
-            // Determine status based on user role
-            $status = $user->isEmployee() ? 'pending_manager' : 'pending_admin';
+            // Determine status based on user role and assignments
+            // Employees go to supervisor first, supervisors go to manager, managers go directly to admin
+            if ($user->isManager()) {
+                $status = 'pending_admin';
+            } elseif ($user->isSupervisor()) {
+                // Supervisor goes to manager, or directly to admin if no manager assigned
+                $status = $user->manager_id ? 'pending_manager' : 'pending_admin';
+            } else {
+                // Employee goes to supervisor first, or manager if no supervisor, or admin if neither
+                if ($user->supervisor_id) {
+                    $status = 'pending_supervisor';
+                } elseif ($user->manager_id) {
+                    $status = 'pending_manager';
+                } else {
+                    $status = 'pending_admin';
+                }
+            }
 
             $leaveRequest = LeaveRequest::create([
                 'user_id'       => $user->id,
@@ -185,7 +200,14 @@ class LeaveRequestController extends Controller
             ->where('user_id', Auth::id())
             ->firstOrFail();
 
-        if (!in_array($leaveRequest->status, ['pending_manager', 'pending_admin'])) {
+        $cancellableStatuses = [
+            'pending_supervisor',
+            'pending_manager',
+            'pending_admin',
+            'supervisor_approved_pending_manager'
+        ];
+
+        if (!in_array($leaveRequest->status, $cancellableStatuses)) {
             return back()->with('error', 'Only pending requests can be cancelled.');
         }
 
@@ -217,6 +239,13 @@ class LeaveRequestController extends Controller
             ->paginate(15);
 
         $leaveTypes = LeaveType::all();
+
+        // Return appropriate view based on user role
+        if ($user->isManager()) {
+            return view('manager.leave-history', compact('allRequests', 'currentYear', 'leaveTypes'));
+        } elseif ($user->isSupervisor()) {
+            return view('supervisor.leave-history', compact('allRequests', 'currentYear', 'leaveTypes'));
+        }
 
         return view('employee.leave-history', compact('allRequests', 'currentYear', 'leaveTypes'));
     }

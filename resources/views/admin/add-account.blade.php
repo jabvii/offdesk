@@ -19,7 +19,7 @@
     <!-- Sidebar -->
     <nav class="sidebar">
         <div class="nav-top">
-            <h2>OFFDesk GUESS</h2>
+            <h2>OFFDesk Admin</h2>
             <ul class="nav-links">
                 <li><a href="{{ route('admin.dashboard') }}" @if(request()->routeIs('admin.dashboard')) class="active" @endif>Dashboard</a></li>
                 <li><a href="{{ route('admin.leave.requests') }}" @if(request()->routeIs('admin.leave.requests')) class="active" @endif>Requests</a></li>
@@ -146,11 +146,26 @@
                         <select name="role" id="role" required onchange="toggleManagerField()">
                             <option value="">Select Role</option>
                             <option value="employee" @selected(old('role') === 'employee')>Employee</option>
+                            <option value="supervisor" @selected(old('role') === 'supervisor')>Supervisor</option>
                             <option value="manager" @selected(old('role') === 'manager')>Manager</option>
                         </select>
                     </div>
 
-                    <!-- Manager Selection (for employees only) -->
+                    <!-- Supervisor Selection (for employees and supervisors) -->
+                    <div class="form-group" id="supervisorField" style="display: none;">
+                        <label for="supervisor_id">Assign Supervisor (Optional)</label>
+                        <select name="supervisor_id" id="supervisor_id">
+                            <option value="">Auto-assign from department</option>
+                            @foreach($supervisors as $supervisor)
+                                <option value="{{ $supervisor->id }}" data-department="{{ $supervisor->department }}" @selected(old('supervisor_id') == $supervisor->id)>
+                                    {{ $supervisor->name }} ({{ $supervisor->department }})
+                                </option>
+                            @endforeach
+                        </select>
+                        <small>Supervisors who report to a manager</small>
+                    </div>
+
+                    <!-- Manager Selection (for employees and supervisors) -->
                     <div class="form-group" id="managerField" style="display: none;">
                         <label for="manager_id">Assign Manager (Optional)</label>
                         <select name="manager_id" id="manager_id">
@@ -161,11 +176,19 @@
                                 </option>
                             @endforeach
                         </select>
-                        <small>Leave empty to auto-assign manager from department</small>
+                        <small>Managers who oversee the department</small>
                     </div>
 
-                    <div class="manager-note" id="managerNote">
-                        <strong>Note:</strong> Managers have no manager assigned. They can be assigned as a supervisor for employees.
+                    <!-- Is Supervisor Checkbox (for manager role) -->
+                    <div class="form-group" id="isSupervisorField" style="display: none;">
+                        <label for="is_supervisor">
+                            <input type="checkbox" name="is_supervisor" id="is_supervisor" value="1" @checked(old('is_supervisor'))>
+                            <span>This person can also supervise employees in their department</span>
+                        </label>
+                    </div>
+
+                    <div class="manager-note" id="managerNote" style="display: none;">
+                        <strong>Note:</strong> Managers oversee the department. Supervisors report to a manager and can supervise employees.
                     </div>
 
                     <!-- Form Actions -->
@@ -200,50 +223,56 @@ function confirmCreateAccount() {
 function toggleManagerField() {
     const roleSelect = document.getElementById('role');
     const managerField = document.getElementById('managerField');
+    const supervisorField = document.getElementById('supervisorField');
+    const isSupervisorField = document.getElementById('isSupervisorField');
     const managerNote = document.getElementById('managerNote');
+    const role = roleSelect.value;
 
-    if (roleSelect.value === 'employee') {
+    // Reset all visibility
+    managerField.style.display = 'none';
+    supervisorField.style.display = 'none';
+    isSupervisorField.style.display = 'none';
+    managerNote.style.display = 'none';
+
+    // Show/hide based on role
+    if (role === 'employee') {
+        // Employee: needs both supervisor and manager
+        supervisorField.style.display = 'block';
         managerField.style.display = 'block';
-        managerNote.classList.remove('show');
-    } else if (roleSelect.value === 'manager') {
-        managerField.style.display = 'none';
-        managerNote.classList.add('show');
-    } else {
-        managerField.style.display = 'none';
-        managerNote.classList.remove('show');
+    } else if (role === 'supervisor') {
+        // Supervisor: only needs manager (not another supervisor)
+        managerField.style.display = 'block';
+        managerNote.style.display = 'block';
+    } else if (role === 'manager') {
+        // Manager: can be marked as supervisor
+        isSupervisorField.style.display = 'block';
+        managerNote.style.display = 'block';
     }
 }
 
 function filterManagersByDepartment() {
     const departmentSelect = document.getElementById('department');
     const managerSelect = document.getElementById('manager_id');
+    const supervisorSelect = document.getElementById('supervisor_id');
     const selectedDepartment = departmentSelect.value;
 
-    const allOptions = managerSelect.querySelectorAll('option');
-
-    // Reset to auto-assign option
+    // Filter managers
+    const allManagerOptions = managerSelect.querySelectorAll('option');
     managerSelect.value = '';
-
-    let visibleCount = 1; // Start at 1 for the "Auto-assign" option
-
-    allOptions.forEach((option, index) => {
-        if (index === 0) return; // Skip the "Auto-assign" option
-
+    allManagerOptions.forEach((option, index) => {
+        if (index === 0) return;
         const managerDepartment = option.getAttribute('data-department');
-
-        // Show managers matching the selected department
-        if (managerDepartment === selectedDepartment) {
-            option.style.display = '';
-            visibleCount++;
-        } else {
-            option.style.display = 'none';
-        }
+        option.style.display = managerDepartment === selectedDepartment ? '' : 'none';
     });
 
-    // If only auto-assign option is visible, show a message
-    if (visibleCount === 1 && selectedDepartment) {
-        // No matching managers found, will use auto-assign
-    }
+    // Filter supervisors
+    const allSupervisorOptions = supervisorSelect.querySelectorAll('option');
+    supervisorSelect.value = '';
+    allSupervisorOptions.forEach((option, index) => {
+        if (index === 0) return;
+        const supervisorDepartment = option.getAttribute('data-department');
+        option.style.display = supervisorDepartment === selectedDepartment ? '' : 'none';
+    });
 }
 
 // Initialize on page load

@@ -4,33 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>OffDesk - Manager Leave Requests</title>
+    <title>OffDesk - Supervisor Leave Requests</title>
     <link rel="stylesheet" href="{{ asset('css/shared/globals.css') }}">
     <link rel="stylesheet" href="{{ asset('css/shared/sidebar.css') }}">
     <link rel="stylesheet" href="{{ asset('css/shared/buttons.css') }}">
     <link rel="stylesheet" href="{{ asset('css/shared/alerts.css') }}">
     <link rel="stylesheet" href="{{ asset('css/shared/modals.css') }}">
     <link rel="stylesheet" href="{{ asset('css/shared/forms.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/manager/leave-requests.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/supervisor/leave-requests.css') }}">
 </head>
 <body>
 <div class="dashboard-container">
     <!-- Sidebar -->
     <nav class="sidebar">
         <div class="nav-top">
-            <h2>OFFDesk Manager</h2>
+            <h2>OFFDesk Supervisor</h2>
             <ul class="nav-links">
-                <li><a href="{{ route('manager.dashboard') }}">Dashboard</a></li>
+                <li><a href="{{ route('supervisor.dashboard') }}">Dashboard</a></li>
                 <li><a href="#" id="openLeaveModalLink">Request Leave</a></li>
                 <li> 
-                    <a href="{{ route('manager.leave.requests') }}" class="active">
+                    <a href="{{ route('supervisor.leave.requests') }}" class="active">
                         Requests
                         @if($pendingCount > 0)
                             <span class="badge">{{ $pendingCount }}</span>
                         @endif
                     </a>
                 </li>
-                <li><a href="{{ route('manager.leave.history') }}" @if(request()->routeIs('manager.leave.history')) class="active" @endif>Leave History</a></li>
+                <li><a href="{{ route('supervisor.leave.history') }}" @if(request()->routeIs('supervisor.leave.history')) class="active" @endif>Leave History</a></li>
             </ul>
         </div>
         <div class="nav-bottom">
@@ -56,7 +56,7 @@
                 <div class="alert alert-error">{{ session('error') }}</div>
             @endif
 
-            <h2 class="dblue">Pending Leave Requests (Awaiting Manager Approval)</h2>
+            <h2 class="dblue">Pending Leave Requests (Awaiting Supervisor Approval)</h2>
 
             <div class="requests-table-wrapper">
                 <table border="1" cellpadding="8" cellspacing="0" class="requests-table">
@@ -66,8 +66,6 @@
                             <th>Leave Type</th>
                             <th>Dates</th>
                             <th>Days</th>
-                            <th>Request Type</th>
-                            <th>Supervisor Approval</th>
                             <th>Reason</th>
                             <th>Action</th>
                         </tr>
@@ -83,39 +81,15 @@
                                 <button type="button" class="view-sessions-btn" data-leave-id="{{ $leave->id }}" style="margin-top: 5px; padding: 3px 6px; font-size: 12px;">View Sessions</button>
                             </td>
                             <td>{{ $leave->total_days }}</td>
-                            <td>
-                                @if($leave->user->isSupervisor())
-                                    <span style="background: #7A9A7D; color: white; padding: 3px 8px; border-radius: 3px; font-size: 12px;">Supervisor Request</span>
-                                @else
-                                    <span style="background: #5B8DBE; color: white; padding: 3px 8px; border-radius: 3px; font-size: 12px;">Employee Request</span>
-                                @endif
-                            </td>
-                            <td>
-                                @if($leave->status === 'supervisor_approved_pending_manager' && $leave->supervisor)
-                                    <span style="background: #28a745; color: white; padding: 3px 8px; border-radius: 3px; font-size: 12px;">Approved</span><br>
-                                    <strong>{{ $leave->supervisor->name }}</strong><br>
-                                    <small style="color: #888;">{{ $leave->supervisor_remarks ?? 'No remarks' }}</small>
-                                @elseif($leave->status === 'pending_supervisor')
-                                    <span style="background: #ffc107; color: #333; padding: 3px 8px; border-radius: 3px; font-size: 12px;">Awaiting Supervisor</span>
-                                @elseif($leave->user->isSupervisor())
-                                    <small style="color: #888;">N/A (Supervisor's own request)</small>
-                                @else
-                                    <small style="color: #888;">Direct to manager</small>
-                                @endif
-                            </td>
                             <td>{{ $leave->reason }}</td>
                             <td>
-                                @if($leave->status === 'pending_supervisor')
-                                    <span style="color: #888; font-style: italic;">Waiting for supervisor</span>
-                                @else
-                                    <button class="action-btn" data-id="{{ $leave->id }}" data-action="approved">Approve</button>
-                                    <button class="action-btn" data-id="{{ $leave->id }}" data-action="rejected">Reject</button>
-                                @endif
+                                <button class="action-btn" data-id="{{ $leave->id }}" data-action="approved">Approve</button>
+                                <button class="action-btn" data-id="{{ $leave->id }}" data-action="rejected">Reject</button>
                             </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="8">No pending requests 🎉</td>
+                            <td colspan="6">No pending requests 🎉</td>
                         </tr>
                         @endforelse
                     </tbody>
@@ -185,7 +159,7 @@
         <form id="actionForm" method="POST">
             @csrf
             <input type="hidden" name="status" id="actionStatus">
-            <textarea name="manager_remarks" id="remarks" rows="4" placeholder="Enter reason or remarks..." required></textarea>
+            <textarea name="supervisor_remarks" id="remarks" rows="4" placeholder="Enter reason or remarks..." required></textarea>
             <div class="modal-actions">
                 <button type="button" class="conf-btn">Confirm</button>
                 <button type="button" class="canc-btn">Cancel</button>
@@ -295,7 +269,7 @@ document.querySelectorAll('.action-btn').forEach(button => {
         const leaveId = this.dataset.id;
         modalTitle.textContent = action === 'approved' ? 'Approve Request' : 'Reject Request';
         statusInput.value = action;
-        form.action = `/manager/leave-requests/${leaveId}/decision`;
+        form.action = `/supervisor/leave-requests/${leaveId}/decision`;
         remarks.value = '';
         actionModal.style.display = 'flex';
     });
@@ -312,7 +286,7 @@ document.querySelector('.close-sessions-btn').addEventListener('click', ()=> vie
 document.querySelectorAll('.view-sessions-btn').forEach(button => {
     button.addEventListener('click', function() {
         const leaveId = this.dataset.leaveId;
-        fetch(`/manager/leave-requests/${leaveId}/sessions`)
+        fetch(`/supervisor/leave-requests/${leaveId}/sessions`)
             .then(res => res.json())
             .then(data => {
                 const body = document.getElementById('sessionsTableBodyModal');

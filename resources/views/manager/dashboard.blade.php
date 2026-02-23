@@ -19,7 +19,7 @@
     <!-- Sidebar -->
     <nav class="sidebar">
         <div class="nav-top">
-            <h2>OFFDesk GUESS</h2>
+            <h2>OFFDesk Manager</h2>
             <ul class="nav-links">
                 <li><a href="{{ route('manager.dashboard') }}" @if(request()->routeIs('manager.dashboard')) class="active" @endif>Dashboard</a></li>
                 <li><a href="#" id="openLeaveModalLink">Request Leave</a></li>

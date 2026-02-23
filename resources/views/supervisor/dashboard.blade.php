@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+<head> 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>OffDesk - Dashboard</title>
+    <title>OffDesk - Supervisor Dashboard</title>
     <link rel="stylesheet" href="{{ asset('css/shared/globals.css') }}">
     <link rel="stylesheet" href="{{ asset('css/shared/sidebar.css') }}">
     <link rel="stylesheet" href="{{ asset('css/shared/buttons.css') }}">
     <link rel="stylesheet" href="{{ asset('css/shared/alerts.css') }}">
     <link rel="stylesheet" href="{{ asset('css/shared/modals.css') }}">
     <link rel="stylesheet" href="{{ asset('css/shared/forms.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/employee/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/supervisor/dashboard.css') }}">
 
 </head>
 <body>
@@ -19,11 +19,19 @@
     <!-- Sidebar -->
     <nav class="sidebar">
         <div class="nav-top">
-            <h2>OFFDesk Employee</h2>
+            <h2>OFFDesk Supervisor</h2>
             <ul class="nav-links">
-                <li><a href="{{ route('dashboard') }}" @if(request()->routeIs('dashboard')) class="active" @endif>Dashboard</a></li>
+                <li><a href="{{ route('supervisor.dashboard') }}" @if(request()->routeIs('supervisor.dashboard')) class="active" @endif>Dashboard</a></li>
                 <li><a href="#" id="openLeaveModalLink">Request Leave</a></li>
-                <li><a href="{{ route('employee.leave.history') }}" @if(request()->routeIs('employee.leave.history')) class="active" @endif>Leave History</a></li>
+                <li>
+                    <a href="{{ route('supervisor.leave.requests') }}" @if(request()->routeIs('supervisor.leave.requests')) class="active" @endif>
+                        Requests
+                        @if($pendingCount > 0)
+                            <span class="badge">{{ $pendingCount }}</span>
+                        @endif
+                    </a>
+                </li>
+                <li><a href="{{ route('supervisor.leave.history') }}" @if(request()->routeIs('supervisor.leave.history')) class="active" @endif>Leave History</a></li>
             </ul>
         </div>
         <div class="nav-bottom">
@@ -152,8 +160,7 @@
                                             @else
                                                 @foreach($dayLeaves as $leave)
                                                     <div class="leave-dot {{ $leave['type'] }} {{ $leave['session'] }}">
-                                                        {{-- Optionally add a label inside the dot --}}
-                                                        {{ $leave['session'] !== 'full' ? strtoupper($leave['session'][0]) : '' }}
+                                                        {{ $leave['session'] !== 'whole_day' ? strtoupper($leave['session'][0]) : '' }}
                                                     </div>
                                                 @endforeach
                                             @endif
@@ -185,17 +192,15 @@
 
                             <p>{{ $request->reason }}</p>
 
-                            @if($request->status !== 'pending' && $request->admin_remarks)
+                            @if($request->status !== 'pending_admin' && $request->admin_remarks)
                                 <p class="pdark"><strong>Admin Remarks:</strong> {{ $request->admin_remarks }}</p>
                             @endif
                         </div>
 
                         <div class="leave-request-actions">
-                            <span class="status-badge status-{{ $request->status }}">
-                                {{ ucfirst($request->status) }}
-                            </span>
-                            @if(in_array($request->status, ['pending_supervisor', 'pending_manager', 'pending_admin', 'supervisor_approved_pending_manager']))
-                                <form action="{{ route('leave.cancel', $request->id) }}" method="POST">
+                            <span class="status-badge status-{{ $request->status }}">{{ ucfirst(str_replace('_', ' ', $request->status)) }}</span>
+                            @if(in_array($request->status, ['pending_manager', 'pending_admin', 'supervisor_approved_pending_manager']))
+                                <form action="{{ route('leave.cancel', $request->id) }}" method="POST" style="display: inline;">
                                     @csrf
                                     <button type="submit" class="btn btn-danger">Cancel</button>
                                 </form>
@@ -203,10 +208,38 @@
                         </div>
                     </div>
                 @empty
-                    <p class="no-requests">No leave requests yet</p>
+                    <p id="no-requests-message">No leave requests yet.</p>
                 @endforelse
             </div>
+        </div>
+    </div>
+</div>
 
+<!-- Modal for viewing leave sessions -->
+<div id="leaveSessionModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modalTitle">Leave Details</h2>
+            <button class="modal-close" onclick="closeLeaveSessionModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p><strong>Date Range:</strong> <span id="dateRange"></span></p>
+            <div class="table-responsive">
+                <table class="simple-table">
+                    <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Session</th>
+                    </tr>
+                    </thead>
+                    <tbody id="leaveSessionsTableBody">
+                    <!-- Sessions populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeLeaveSessionModal()">Close</button>
         </div>
     </div>
 </div>
@@ -269,13 +302,28 @@
 
 <script src="{{ asset('js/dashboard.js') }}"></script>
 <script>
-// Remove dots for cancelled requests on page load
-const cancelledLeaveIds = @json($leaveRequests->whereNotIn('status', ['approved','pending'])->pluck('id'));
+function confirmLogout() {
+    return confirm('Are you sure you want to logout?');
+}
+
+function openModal() {
+    document.getElementById('leaveRequestModal').classList.add('active');
+}
+
+function closeModal() {
+    document.getElementById('leaveRequestModal').classList.remove('active');
+    document.getElementById('leaveRequestForm').reset();
+    document.getElementById('sessionsTableContainer').style.display = 'none';
+}
+
 document.addEventListener('DOMContentLoaded', function() {
-    cancelledLeaveIds.forEach(id => {
-        const dot = document.querySelector(`.leave-dot[data-leave-id="${id}"]`);
-        if(dot) dot.remove();
-    });
+    const openLeaveModalLink = document.getElementById('openLeaveModalLink');
+    if (openLeaveModalLink) {
+        openLeaveModalLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            openModal();
+        });
+    }
 
     const endDateInput = document.getElementById('end_date');
     const startDateInput = document.getElementById('start_date');
@@ -306,11 +354,10 @@ document.addEventListener('DOMContentLoaded', function() {
         let currentDate = new Date(start);
         const dateFormat = (date) => date.toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' });
 
-        let dayCount = 0;
         while (currentDate <= end) {
             const dateStr = currentDate.toISOString().split('T')[0];
             const formattedDate = dateFormat(currentDate);
-            const dayOfWeek = currentDate.getDay(); // 0 = Sunday, 6 = Saturday
+            const dayOfWeek = currentDate.getDay();
             const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
 
             const row = document.createElement('tr');
@@ -342,10 +389,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
             sessionsTableBody.appendChild(row);
             currentDate.setDate(currentDate.getDate() + 1);
-            dayCount++;
         }
 
-        console.log('Generated sessions table with ' + dayCount + ' days');
         sessionsTableContainer.style.display = 'block';
     }
 
@@ -360,34 +405,15 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('Please select start and end dates first');
             return false;
         }
-
-        const sessions = Array.from(sessionSelects).map(select => select.value);
-        const startDate = document.getElementById('start_date').value;
-        const endDate = document.getElementById('end_date').value;
-
-        // Count only weekdays between start and end
-        const start = new Date(startDate + 'T00:00:00');
-        const end = new Date(endDate + 'T00:00:00');
-        let weekdayCount = 0;
-        let d = new Date(start);
-        while (d <= end) {
-            const day = d.getDay();
-            if (day !== 0 && day !== 6) weekdayCount++;
-            d.setDate(d.getDate() + 1);
-        }
-
-        console.log('Form submission debug info:');
-        console.log('  Start date:', startDate);
-        console.log('  End date:', endDate);
-        console.log('  Expected weekdays (JS):', weekdayCount);
-        console.log('  Session selects found:', sessionSelects.length);
-        console.log('  Sessions:', sessions);
-
-        if (sessions.length !== weekdayCount) {
-            console.error(`Mismatch: expected ${weekdayCount} sessions but found ${sessions.length}`);
-        }
     });
 });
+
+window.onclick = function(event) {
+    const modal = document.getElementById('leaveRequestModal');
+    if (event.target == modal) {
+        closeModal();
+    }
+}
 </script>
 </body>
 </html>

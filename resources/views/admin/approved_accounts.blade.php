@@ -21,7 +21,7 @@
     <!-- Sidebar -->
     <nav class="sidebar">
         <div class="nav-top">
-            <h2>OFFDesk GUESS</h2>
+            <h2>OFFDesk Admin</h2>
             <ul class="nav-links">
                 <li><a href="{{ route('admin.dashboard') }}" @if(request()->routeIs('admin.dashboard')) class="active" @endif>Dashboard</a></li>
                 <li>
@@ -73,6 +73,8 @@
                         <th>Email</th>
                         <th>Role</th>
                         <th>Department</th>
+                        <th>Supervisor</th>
+                        <th>Manager</th>
                         <th>Registered At</th>
                     </tr>
                 </thead>
@@ -83,6 +85,8 @@
                             <td>{{ $user->email }}</td>
                             <td>{{ ucfirst($user->role) }}</td>
                             <td>{{ $user->department }}</td>
+                            <td>{{ $user->supervisor ? $user->supervisor->name : '-' }}</td>
+                            <td>{{ $user->manager ? $user->manager->name : '-' }}</td>
                             <td>{{ $user->created_at->format('M d, Y') }}</td>
                         </tr>
                     @endforeach

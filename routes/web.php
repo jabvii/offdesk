@@ -4,8 +4,10 @@ use App\Http\Controllers\LeaveRequestController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ManagerController;
+use App\Http\Controllers\SupervisorController;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\ManagerMiddleware;
+use App\Http\Middleware\SupervisorMiddleware;
 use Illuminate\Support\Facades\Route;
 
 // Root redirect
@@ -67,6 +69,20 @@ Route::prefix('manager')->middleware(['auth', ManagerMiddleware::class])->group(
     
     // Manager's own leave history
     Route::get('/leave-history', [LeaveRequestController::class, 'history'])->name('manager.leave.history');
+});
+
+// Supervisor Routes (auth + supervisor only)
+Route::prefix('supervisor')->middleware(['auth', SupervisorMiddleware::class])->group(function () {
+    // Supervisor dashboard
+    Route::get('/dashboard', [SupervisorController::class, 'dashboard'])->name('supervisor.dashboard');
+
+    // Employee leave requests awaiting supervisor approval
+    Route::get('/leave-requests', [SupervisorController::class, 'leaveRequests'])->name('supervisor.leave.requests');
+    Route::post('/leave-requests/{id}/decision', [SupervisorController::class, 'decision'])->name('supervisor.leave.decision');
+    Route::get('/leave-requests/{id}/sessions', [SupervisorController::class, 'getLeaveRequestSessions'])->name('supervisor.leave.sessions');
+    
+    // Supervisor's own leave history
+    Route::get('/leave-history', [SupervisorController::class, 'history'])->name('supervisor.leave.history');
 });
 
 // This will catch invalid URLs like "/dashboasd"

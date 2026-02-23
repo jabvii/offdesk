@@ -137,7 +137,8 @@ public function index()
     {   
         $pendingCount = LeaveRequest::where('status', 'pending_admin')->count();
 
-        $employees = User::where('is_admin', 0)
+        $employees = User::with(['supervisor', 'manager'])
+                        ->where('is_admin', 0)
                         ->where('status', 'approved')
                         ->orderBy('created_at', 'desc')
                         ->get();
@@ -155,7 +156,11 @@ public function index()
             ->where('status', 'approved')
             ->get();
 
-        return view('admin.add-account', compact('managers'));
+        $supervisors = User::where('is_supervisor', true)
+            ->where('status', 'approved')
+            ->get();
+
+        return view('admin.add-account', compact('managers', 'supervisors'));
     }
 
     // Store new account created by admin
@@ -166,20 +171,50 @@ public function index()
             'email' => ['required', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'confirmed', Password::min(8)],
             'department' => ['required', 'string', 'in:IT,Accounting,HR,Treasury,Sales,Planning,Visual,Engineering'],
-            'role' => ['required', 'string', 'in:employee,manager'],
+            'role' => ['required', 'string', 'in:employee,supervisor,manager'],
+            'supervisor_id' => ['nullable', 'exists:users,id'],
             'manager_id' => ['nullable', 'exists:users,id'],
+            'is_supervisor' => ['nullable', 'boolean'],
         ]);
 
-        // If role is employee but no manager selected, auto-assign from department
-        if ($validated['role'] === 'employee' && !$validated['manager_id']) {
-            $manager = User::where('department', $validated['department'])
-                ->where('role', 'manager')
-                ->where('status', 'approved')
-                ->first();
-
-            if ($manager) {
-                $validated['manager_id'] = $manager->id;
+        // Handle role-specific assignments
+        if ($validated['role'] === 'employee') {
+            // Employee: needs both supervisor and manager
+            if (!$validated['supervisor_id']) {
+                $supervisor = User::where('department', $validated['department'])
+                    ->where('is_supervisor', true)
+                    ->where('status', 'approved')
+                    ->first();
+                if ($supervisor) {
+                    $validated['supervisor_id'] = $supervisor->id;
+                }
             }
+
+            if (!$validated['manager_id']) {
+                $manager = User::where('department', $validated['department'])
+                    ->where('role', 'manager')
+                    ->where('status', 'approved')
+                    ->first();
+                if ($manager) {
+                    $validated['manager_id'] = $manager->id;
+                }
+            }
+        } elseif ($validated['role'] === 'supervisor') {
+            // Supervisor: needs a manager, can be under another supervisor
+            if (!$validated['manager_id']) {
+                $manager = User::where('department', $validated['department'])
+                    ->where('role', 'manager')
+                    ->where('status', 'approved')
+                    ->first();
+                if ($manager) {
+                    $validated['manager_id'] = $manager->id;
+                }
+            }
+            // Supervisors are marked as supervisors
+            $validated['is_supervisor'] = true;
+        } elseif ($validated['role'] === 'manager') {
+            // Manager: optionally can supervise employees
+            $validated['is_supervisor'] = $request->has('is_supervisor') ? true : false;
         }
 
         $user = User::create([
@@ -188,7 +223,9 @@ public function index()
             'password' => Hash::make($validated['password']),
             'department' => $validated['department'],
             'role' => $validated['role'],
+            'supervisor_id' => $validated['supervisor_id'] ?? null,
             'manager_id' => $validated['manager_id'] ?? null,
+            'is_supervisor' => $validated['is_supervisor'] ?? false,
             'is_admin' => false,
             'status' => 'approved',  // Admin-created accounts are auto-approved
             'is_approved' => true,

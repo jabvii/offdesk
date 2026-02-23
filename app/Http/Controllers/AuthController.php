@@ -43,6 +43,11 @@ class AuthController extends Controller
             return redirect()->route('manager.dashboard');
         }
 
+        // Supervisor redirect (not a manager, but is a supervisor)
+        if ($user->isSupervisor()) {
+            return redirect()->route('supervisor.dashboard');
+        }
+
         // Check pending/rejected status for regular users
         if ($user->status === 'pending') {
             Auth::logout();

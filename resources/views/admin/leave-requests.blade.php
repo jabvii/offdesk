@@ -18,7 +18,7 @@
     <!-- Sidebar -->
     <nav class="sidebar">
         <div class="nav-top">
-            <h2>OFFDesk GUESS</h2>
+            <h2>OFFDesk Admin</h2>
             <ul class="nav-links">
                 <li><a href="{{ route('admin.dashboard') }}" @if(request()->routeIs('admin.dashboard')) class="active" @endif>Dashboard</a></li>
                 <li>
@@ -92,6 +92,8 @@
                             <td>
                                 @if($leave->user->isManager())
                                     <span style="background: #B8956A; color: white; padding: 3px 8px; border-radius: 3px; font-size: 12px;">Manager Request</span>
+                                @elseif($leave->user->isSupervisor())
+                                    <span style="background: #7A9A7D; color: white; padding: 3px 8px; border-radius: 3px; font-size: 12px;">Supervisor Request</span>
                                 @else
                                     <span style="background: #5B8DBE; color: white; padding: 3px 8px; border-radius: 3px; font-size: 12px;">Employee Request</span>
                                 @endif

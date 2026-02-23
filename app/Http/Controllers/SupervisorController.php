@@ -10,9 +10,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
-class ManagerController extends Controller
+class SupervisorController extends Controller
 {
-    // Manager dashboard
+    // Supervisor dashboard
     public function dashboard()
     {
         $user = Auth::user();
@@ -46,21 +46,22 @@ class ManagerController extends Controller
             ->with(['leaveType', 'sessions'])
             ->get();
 
-        $pendingCount = LeaveRequest::whereIn('status', ['pending_supervisor', 'pending_manager', 'supervisor_approved_pending_manager'])
-            ->whereIn('user_id', User::where('manager_id', $user->id)->pluck('id'))
+        // Count pending supervisions
+        $pendingCount = LeaveRequest::where('status', 'pending_supervisor')
+            ->whereIn('user_id', User::where('supervisor_id', $user->id)->pluck('id'))
             ->count();
 
-        return view('manager.dashboard', compact('balances', 'leaveTypes', 'leaveRequests', 'pendingCount'));
+        return view('supervisor.dashboard', compact('balances', 'leaveTypes', 'leaveRequests', 'pendingCount'));
     }
 
-    // View pending employee requests awaiting manager approval
+    // View pending employee requests awaiting supervisor approval
     public function leaveRequests()
     {
-        $manager = Auth::user();
+        $supervisor = Auth::user();
 
-        $pendingRequests = LeaveRequest::with(['user', 'leaveType', 'supervisor'])
-            ->whereIn('status', ['pending_supervisor', 'pending_manager', 'supervisor_approved_pending_manager'])
-            ->whereIn('user_id', User::where('manager_id', $manager->id)->pluck('id'))
+        $pendingRequests = LeaveRequest::with(['user', 'leaveType'])
+            ->where('status', 'pending_supervisor')
+            ->whereIn('user_id', User::where('supervisor_id', $supervisor->id)->pluck('id'))
             ->orderBy('created_at', 'asc')
             ->get();
 
@@ -69,7 +70,7 @@ class ManagerController extends Controller
         // Pass leave types to Blade for modal
         $leaveTypes = LeaveType::all();
 
-        return view('manager.leave-requests', compact('pendingRequests', 'pendingCount', 'leaveTypes'));
+        return view('supervisor.leave-requests', compact('pendingRequests', 'pendingCount', 'leaveTypes'));
     }
 
     // Approve/Reject employee leave request
@@ -77,27 +78,27 @@ class ManagerController extends Controller
     {
         $request->validate([
             'status' => 'required|in:approved,rejected',
-            'manager_remarks' => 'required|string|max:500',
+            'supervisor_remarks' => 'required|string|max:500',
         ]);
 
-        $manager = Auth::user();
+        $supervisor = Auth::user();
 
-        DB::transaction(function () use ($request, $id, $manager) {
+        DB::transaction(function () use ($request, $id, $supervisor) {
             $leave = LeaveRequest::where('id', $id)
-                ->whereIn('status', ['pending_manager', 'supervisor_approved_pending_manager'])
+                ->where('status', 'pending_supervisor')
                 ->firstOrFail();
 
-            // Verify manager is responsible for this employee
-            if ($leave->user->manager_id !== $manager->id) {
+            // Verify supervisor is responsible for this employee
+            if ($leave->user->supervisor_id !== $supervisor->id) {
                 abort(403, 'Unauthorized');
             }
 
             if ($request->status === 'approved') {
-                // Forward to admin
+                // Forward to manager
                 $leave->update([
-                    'status' => 'pending_admin',
-                    'manager_remarks' => $request->manager_remarks,
-                    'forwarded_at' => now(),
+                    'status' => 'supervisor_approved_pending_manager',
+                    'supervisor_remarks' => $request->supervisor_remarks,
+                    'supervisor_approved_at' => now(),
                 ]);
             } elseif ($request->status === 'rejected') {
                 // Reject directly
@@ -112,26 +113,47 @@ class ManagerController extends Controller
 
                 $leave->update([
                     'status' => 'rejected',
-                    'manager_remarks' => $request->manager_remarks,
+                    'supervisor_remarks' => $request->supervisor_remarks,
                 ]);
             }
         });
 
-        $msg = $request->status === 'approved' ? 'forwarded to admin' : 'rejected';
+        $msg = $request->status === 'approved' ? 'forwarded to manager' : 'rejected';
         return back()->with('success', "Leave request {$msg} successfully.");
+    }
+
+    // Show supervisor's own leave history
+    public function history()
+    {
+        $user = Auth::user();
+        $currentYear = date('Y');
+
+        $allRequests = LeaveRequest::where('user_id', $user->id)
+            ->with(['leaveType', 'sessions'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(15);
+
+        $leaveTypes = \App\Models\LeaveType::all();
+
+        // Count pending supervisions for sidebar badge
+        $pendingCount = LeaveRequest::where('status', 'pending_supervisor')
+            ->whereIn('user_id', User::where('supervisor_id', $user->id)->pluck('id'))
+            ->count();
+
+        return view('supervisor.leave-history', compact('allRequests', 'currentYear', 'leaveTypes', 'pendingCount'));
     }
 
     // Get leave sessions for modal
     public function getLeaveRequestSessions($id)
     {
-        $manager = Auth::user();
+        $supervisor = Auth::user();
 
         $leave = LeaveRequest::with('sessions')
-            ->whereIn('status', ['pending_supervisor', 'pending_manager', 'supervisor_approved_pending_manager'])
+            ->where('status', 'pending_supervisor')
             ->findOrFail($id);
 
-        // Verify manager is responsible
-        if ($leave->user->manager_id !== $manager->id) {
+        // Verify supervisor is responsible
+        if ($leave->user->supervisor_id !== $supervisor->id) {
             abort(403);
         }
 
