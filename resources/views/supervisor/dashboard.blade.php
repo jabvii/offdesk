@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="{{ asset('css/shared/modals.css') }}">
     <link rel="stylesheet" href="{{ asset('css/shared/forms.css') }}">
     <link rel="stylesheet" href="{{ asset('css/supervisor/dashboard.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
 </head>
 <body>
@@ -237,12 +238,175 @@
 
                         <div class="leave-request-actions">
                             <span class="status-badge status-{{ $request->status }}">{{ ucfirst(str_replace('_', ' ', $request->status)) }}</span>
+                            <button type="button" class="btn btn-secondary btn-track" onclick="openTrackingModal({{ $request->id }})" title="Track Request"><i class="fas fa-question"></i></button>
                             @if(in_array($request->status, ['pending_manager', 'pending_admin', 'supervisor_approved_pending_manager']))
                                 <form action="{{ route('leave.cancel', $request->id) }}" method="POST" style="display: inline;">
                                     @csrf
-                                    <button type="submit" class="btn btn-danger">Cancel</button>
+                                    <button type="submit" class="btn btn-danger btn-cancel" title="Cancel Request"><i class="fas fa-times"></i></button>
                                 </form>
                             @endif
+                        </div>
+                    </div>
+
+                    <!-- Tracking Modal for this request -->
+                    <div class="modal tracking-modal" id="trackingModal{{ $request->id }}">
+                        <div class="modal-content tracking-modal-content">
+                            <div class="modal-header">
+                                <h2>Request Tracking</h2>
+                                <button type="button" class="modal-close" onclick="closeTrackingModal({{ $request->id }})">&times;</button>
+                            </div>
+                            <div class="tracking-info">
+                                <p><strong>{{ $request->leaveType->name }}</strong></p>
+                                <p>{{ \Carbon\Carbon::parse($request->start_date)->format('M d, Y') }} - {{ \Carbon\Carbon::parse($request->end_date)->format('M d, Y') }}</p>
+                                <p class="tracking-status status-{{ $request->status }}">
+                                    Status: {{ ucfirst(str_replace('_', ' ', $request->status)) }}
+                                </p>
+                            </div>
+
+                            @php
+                                $status = $request->status;
+                                $user = auth()->user();
+                                
+                                // Supervisor workflow: Supervisor → Manager (if assigned) → Admin
+                                $hasManager = $user->manager_id !== null;
+                                
+                                $employeeStatus = 'completed'; // Supervisor submitted
+                                $managerStatus = 'not-applicable';
+                                $adminStatus = 'waiting';
+                                
+                                if ($hasManager) {
+                                    if ($status === 'pending_manager') {
+                                        $managerStatus = 'current';
+                                    } elseif ($status === 'pending_admin') {
+                                        $managerStatus = 'completed';
+                                        $adminStatus = 'current';
+                                    } elseif ($status === 'approved') {
+                                        $managerStatus = 'completed';
+                                        $adminStatus = 'completed';
+                                    } elseif ($status === 'rejected') {
+                                        if ($request->admin_remarks) {
+                                            $managerStatus = 'completed';
+                                            $adminStatus = 'rejected';
+                                        } else {
+                                            $managerStatus = 'rejected';
+                                        }
+                                    } elseif ($status === 'cancelled') {
+                                        if ($request->forwarded_at) {
+                                            $managerStatus = 'completed';
+                                            $adminStatus = 'cancelled';
+                                        } else {
+                                            $managerStatus = 'cancelled';
+                                        }
+                                    }
+                                } else {
+                                    // Goes directly to admin
+                                    if ($status === 'pending_admin') {
+                                        $adminStatus = 'current';
+                                    } elseif ($status === 'approved') {
+                                        $adminStatus = 'completed';
+                                    } elseif ($status === 'rejected') {
+                                        $adminStatus = 'rejected';
+                                    } elseif ($status === 'cancelled') {
+                                        $adminStatus = 'cancelled';
+                                    }
+                                }
+                            @endphp
+
+                            <div class="tracking-chain">
+                                <!-- You (Supervisor) -->
+                                <div class="tracking-step {{ $employeeStatus }}">
+                                    <div class="step-icon">✓</div>
+                                    <div class="step-info">
+                                        <span class="step-role">You (Supervisor)</span>
+                                        <span class="step-name">{{ $user->name }}</span>
+                                        <span class="step-detail">Submitted {{ $request->created_at->format('M d, Y h:i A') }}</span>
+                                    </div>
+                                </div>
+
+                                @if($hasManager)
+                                <div class="chain-connector {{ $managerStatus }}"></div>
+                                <!-- Manager -->
+                                <div class="tracking-step {{ $managerStatus }}">
+                                    <div class="step-icon">
+                                        @if($managerStatus === 'completed')
+                                            ✓
+                                        @elseif($managerStatus === 'rejected')
+                                            ✗
+                                        @elseif($managerStatus === 'cancelled')
+                                            ○
+                                        @elseif($managerStatus === 'current')
+                                            ●
+                                        @else
+                                            2
+                                        @endif
+                                    </div>
+                                    <div class="step-info">
+                                        <span class="step-role">Manager</span>
+                                        <span class="step-name">{{ $user->manager->name ?? 'N/A' }}</span>
+                                        @if($managerStatus === 'completed' && $request->forwarded_at)
+                                            <span class="step-detail">Approved {{ \Carbon\Carbon::parse($request->forwarded_at)->format('M d, Y h:i A') }}</span>
+                                        @elseif($managerStatus === 'rejected')
+                                            <span class="step-detail rejected-text">Rejected</span>
+                                        @elseif($managerStatus === 'cancelled')
+                                            <span class="step-detail cancelled-text">Cancelled at this stage</span>
+                                        @elseif($managerStatus === 'current')
+                                            <span class="step-detail pending-text">Awaiting approval</span>
+                                        @else
+                                            <span class="step-detail">Pending</span>
+                                        @endif
+                                        @if($request->manager_remarks)
+                                            <span class="step-remarks">"{{ $request->manager_remarks }}"</span>
+                                        @endif
+                                    </div>
+                                </div>
+                                @endif
+
+                                <div class="chain-connector {{ $adminStatus }}"></div>
+                                <!-- Admin -->
+                                <div class="tracking-step {{ $adminStatus }}">
+                                    <div class="step-icon">
+                                        @if($adminStatus === 'completed')
+                                            ✓
+                                        @elseif($adminStatus === 'rejected')
+                                            ✗
+                                        @elseif($adminStatus === 'cancelled')
+                                            ○
+                                        @elseif($adminStatus === 'current')
+                                            ●
+                                        @else
+                                            3
+                                        @endif
+                                    </div>
+                                    <div class="step-info">
+                                        <span class="step-role">Admin</span>
+                                        <span class="step-name">Final Approval</span>
+                                        @if($adminStatus === 'completed')
+                                            <span class="step-detail">Approved</span>
+                                        @elseif($adminStatus === 'rejected')
+                                            <span class="step-detail rejected-text">Rejected</span>
+                                        @elseif($adminStatus === 'cancelled')
+                                            <span class="step-detail cancelled-text">Cancelled at this stage</span>
+                                        @elseif($adminStatus === 'current')
+                                            <span class="step-detail pending-text">Awaiting approval</span>
+                                        @else
+                                            <span class="step-detail">Pending</span>
+                                        @endif
+                                        @if($request->admin_remarks)
+                                            <span class="step-remarks">"{{ $request->admin_remarks }}"</span>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+
+                            @if($status === 'cancelled')
+                            <div class="cancelled-info">
+                                <p><strong>Cancelled by:</strong> {{ $user->name }} (You)</p>
+                            </div>
+                            @endif
+
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" onclick="closeTrackingModal({{ $request->id }})">Close</button>
+                            </div>
                         </div>
                     </div>
                 @empty
@@ -340,6 +504,22 @@
 
 <script src="{{ asset('js/dashboard.js') }}"></script>
 <script>
+// Tracking modal functions
+function openTrackingModal(id) {
+    document.getElementById('trackingModal' + id).classList.add('active');
+}
+
+function closeTrackingModal(id) {
+    document.getElementById('trackingModal' + id).classList.remove('active');
+}
+
+// Close modal when clicking outside
+document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('tracking-modal')) {
+        e.target.classList.remove('active');
+    }
+});
+
 function confirmLogout() {
     return confirm('Are you sure you want to logout?');
 }
