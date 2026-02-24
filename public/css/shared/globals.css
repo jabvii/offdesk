@@ -76,11 +76,11 @@ h3.vacation, h4.vacation {
 }
 
 h3.sick, h4.sick {
-    color: #e74c3c;
+    color: #f39c12;
 }
 
 h3.emergency, h4.emergency {
-    color: #f39c12;
+    color: #e74c3c;
 }
 
 h3.vacation, h3.sick, h3.emergency {

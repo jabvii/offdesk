@@ -25,11 +25,11 @@
 }
 
 .balance-card h3.sick {
-    color: #e74c3c;
+    color: #f39c12;
 }
 
 .balance-card h3.emergency {
-    color: #f39c12;
+    color: #e74c3c;
 }
 
 .balance-card h3.paternity {
@@ -180,6 +180,10 @@
     background: #27ae60;
 }
 
+.leave-dot.approved.emergency {
+    background: #e74c3c;
+}
+
 .leave-dot.pending {
     background: #f1c40f;
     color: #333;
@@ -239,11 +243,11 @@
 }
 
 .leave-request-info h4.sick {
-    color: #e74c3c;
+    color: #f39c12;
 }
 
 .leave-request-info h4.emergency {
-    color: #f39c12;
+    color: #e74c3c;
 }
 
 .leave-request-info h4.paternity {

@@ -81,11 +81,11 @@
 }
 
 .leave-request-info h4.sick {
-    color: #e74c3c;
+    color: #f39c12;
 }
 
 .leave-request-info h4.emergency {
-    color: #f39c12;
+    color: #e74c3c;
 }
 
 .leave-request-info h4.paternity {

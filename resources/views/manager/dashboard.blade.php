@@ -191,7 +191,13 @@
                                                 <div class="weekend-indicator" title="Weekend"></div>
                                             @else
                                                 @foreach($dayLeaves as $leave)
-                                                    <div class="leave-dot {{ $leave['status'] }}" title="{{ ucfirst($leave['type']) }} Leave ({{ ucfirst($leave['status']) }})">
+                                                    @php
+                                                        $dotClass = $leave['status'];
+                                                        if ($leave['status'] === 'approved' && $leave['type'] === 'emergency') {
+                                                            $dotClass = 'approved emergency';
+                                                        }
+                                                    @endphp
+                                                    <div class="leave-dot {{ $dotClass }}" title="{{ ucfirst($leave['type']) }} Leave ({{ ucfirst($leave['status']) }})">
                                                         {{ $leave['status'] === 'pending' ? 'P' : $leave['acronym'] }}
                                                     </div>
                                                 @endforeach
