@@ -73,6 +73,7 @@
 
 .balance-value.available {
     color: #27ae60;
+    font-size: large;
 }
 
 /* Calendar Styles */

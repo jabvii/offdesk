@@ -110,7 +110,13 @@ class LeaveRequestController extends Controller
 
         // Check overlapping leaves (approved or pending only)
         $overlap = LeaveRequest::where('user_id', $user->id)
-            ->whereIn('status', ['pending', 'approved'])
+            ->whereIn('status', [
+                'pending_supervisor',
+                'pending_manager', 
+                'pending_admin',
+                'supervisor_approved_pending_manager',
+                'approved'
+            ])
             ->where(function($q) use ($start, $end) {
                 $q->whereBetween('start_date', [$start, $end])
                   ->orWhereBetween('end_date', [$start, $end])
@@ -122,7 +128,7 @@ class LeaveRequestController extends Controller
             ->exists();
 
         if ($overlap) {
-            return back()->with('error', 'You already have a leave during these dates.');
+            return back()->with('error', 'You already have a pending or approved leave request during these dates.');
         }
 
         $currentYear = date('Y');

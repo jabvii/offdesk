@@ -140,15 +140,22 @@
                                         $managerStatus = $hasManager ? 'completed' : 'not-applicable';
                                         $adminStatus = 'completed';
                                     } elseif ($status === 'rejected') {
-                                        if ($request->admin_remarks && !$request->manager_remarks && !$request->supervisor_remarks) {
+                                        // Determine where rejection occurred based on who processed last
+                                        if ($request->admin_remarks) {
+                                            // Admin processed it - admin rejected
                                             $supervisorStatus = 'completed';
                                             $managerStatus = $hasManager ? 'completed' : 'not-applicable';
                                             $adminStatus = 'rejected';
-                                        } elseif ($request->manager_remarks) {
+                                        } elseif ($request->manager_remarks || $request->forwarded_at) {
+                                            // Manager processed but no admin remarks - manager rejected
                                             $supervisorStatus = 'completed';
                                             $managerStatus = 'rejected';
-                                        } elseif ($request->supervisor_remarks) {
+                                            $adminStatus = 'not-reached';
+                                        } elseif ($request->supervisor_remarks || $request->supervisor_approved_at) {
+                                            // Supervisor processed but no manager - supervisor rejected
                                             $supervisorStatus = 'rejected';
+                                            $managerStatus = $hasManager ? 'not-reached' : 'not-applicable';
+                                            $adminStatus = 'not-reached';
                                         }
                                     } elseif ($status === 'cancelled') {
                                         if ($request->supervisor_approved_at || $request->supervisor_remarks) {
@@ -158,9 +165,12 @@
                                                 $adminStatus = 'cancelled';
                                             } else {
                                                 $managerStatus = $hasManager ? 'cancelled' : 'not-applicable';
+                                                $adminStatus = 'not-reached';
                                             }
                                         } else {
                                             $supervisorStatus = 'cancelled';
+                                            $managerStatus = $hasManager ? 'not-reached' : 'not-applicable';
+                                            $adminStatus = 'not-reached';
                                         }
                                     }
                                 } elseif ($hasManager) {
@@ -245,7 +255,7 @@
                                         @elseif($managerStatus === 'rejected') ✗
                                         @elseif($managerStatus === 'cancelled') ○
                                         @elseif($managerStatus === 'current') ●
-                                        @elseif($managerStatus === 'not-applicable') -
+                                        @elseif($managerStatus === 'not-applicable' || $managerStatus === 'not-reached') -
                                         @else 3
                                         @endif
                                     </div>
@@ -262,6 +272,8 @@
                                             <span class="step-detail pending-text">Awaiting approval</span>
                                         @elseif($managerStatus === 'not-applicable')
                                             <span class="step-detail">Not in workflow</span>
+                                        @elseif($managerStatus === 'not-reached')
+                                            <span class="step-detail">Not reached</span>
                                         @else
                                             <span class="step-detail">Pending</span>
                                         @endif
@@ -279,6 +291,7 @@
                                         @elseif($adminStatus === 'rejected') ✗
                                         @elseif($adminStatus === 'cancelled') ○
                                         @elseif($adminStatus === 'current') ●
+                                        @elseif($adminStatus === 'not-reached') -
                                         @else 4
                                         @endif
                                     </div>
@@ -293,6 +306,8 @@
                                             <span class="step-detail cancelled-text">Cancelled at this stage</span>
                                         @elseif($adminStatus === 'current')
                                             <span class="step-detail pending-text">Awaiting approval</span>
+                                        @elseif($adminStatus === 'not-reached')
+                                            <span class="step-detail">Not reached</span>
                                         @else
                                             <span class="step-detail">Pending</span>
                                         @endif

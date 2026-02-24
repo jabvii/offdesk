@@ -297,9 +297,12 @@
                                             // Manager processed but no admin remarks - manager rejected
                                             $supervisorStatus = 'completed';
                                             $managerStatus = 'rejected';
+                                            $adminStatus = 'not-reached';
                                         } elseif ($request->supervisor_remarks || $request->supervisor_approved_at) {
                                             // Supervisor processed but no manager - supervisor rejected
                                             $supervisorStatus = 'rejected';
+                                            $managerStatus = $hasManager ? 'not-reached' : 'not-applicable';
+                                            $adminStatus = 'not-reached';
                                         }
                                     } elseif ($status === 'cancelled') {
                                         // Show where ticket was when cancelled
