@@ -217,7 +217,7 @@ public function index()
                 $manager = User::where('department', $validated['department'])
                     ->where('role', 'manager')
                     ->where('status', 'approved')
-                    ->first();
+                    ->first(); 
                 if ($manager) {
                     $validated['manager_id'] = $manager->id;
                 }

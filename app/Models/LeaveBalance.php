@@ -16,6 +16,12 @@ class LeaveBalance extends Model
         'year'
     ];
 
+    protected $casts = [
+        'total_credits' => 'float',
+        'used_credits' => 'float',
+        'pending_credits' => 'float',
+    ];
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -26,7 +32,7 @@ class LeaveBalance extends Model
         return $this->belongsTo(LeaveType::class);
     }
 
-    public function getAvailableCreditsAttribute(): int
+    public function getAvailableCreditsAttribute(): float
     {
         return $this->total_credits - $this->used_credits - $this->pending_credits;
     }

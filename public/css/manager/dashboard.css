@@ -167,33 +167,22 @@
 .leave-dot {
     width: 100%;
     height: 100%;
-    font-size: 10px;
+    font-size: 14px;
     font-weight: bold;
     color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.leave-dot.vacation {
-    background: #3498db;
+/* Status-based colors */
+.leave-dot.approved {
+    background: #27ae60;
 }
 
-.leave-dot.sick {
-    background: #e74c3c;
-}
-
-.leave-dot.emergency {
-    background: #f39c12;
-}
-
-.leave-dot.paternity {
-    background: #9b59b6;
-}
-
-.leave-dot.parental {
-    background: #1abc9c;
-}
-
-.leave-dot.service_incentive {
-    background: #34495e;
+.leave-dot.pending {
+    background: #f1c40f;
+    color: #333;
 }
 
 /* Weekend styling */

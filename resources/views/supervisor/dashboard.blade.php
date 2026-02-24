@@ -97,13 +97,43 @@
                 </div>
 
                 @php
+                // Leave type code to acronym mapping
+                $leaveAcronyms = [
+                    'vacation' => 'VL',
+                    'sick' => 'SL',
+                    'emergency' => 'EL',
+                    'paternity' => 'PAL',
+                    'parental' => 'PRL',
+                    'service_incentive' => 'SIL',
+                ];
+
+                // Pending statuses in the workflow
+                $pendingStatuses = [
+                    'pending_supervisor',
+                    'pending_manager',
+                    'pending_admin',
+                    'supervisor_approved_pending_manager',
+                ];
+
                 $leaveDays = [];
                 foreach ($leaveRequests as $request) {
                     $status = strtolower($request->status);
-                    if(!in_array($status, ['approved','pending'])) continue;
+                    
+                    // Determine display status: approved or pending
+                    if ($status === 'approved') {
+                        $displayStatus = 'approved';
+                    } elseif (in_array($status, $pendingStatuses)) {
+                        $displayStatus = 'pending';
+                    } else {
+                        continue; // Skip rejected, cancelled, etc.
+                    }
 
                     $start = \Carbon\Carbon::parse($request->start_date);
                     $end = \Carbon\Carbon::parse($request->end_date);
+
+                    // Get leave type acronym
+                    $leaveCode = strtolower($request->leaveType->code ?? '');
+                    $acronym = $leaveAcronyms[$leaveCode] ?? strtoupper(substr($leaveCode, 0, 2));
 
                     // Create a map of sessions by date
                     $sessionMap = [];
@@ -117,8 +147,9 @@
 
                         $leaveDays[$start->month][$start->day][] = [
                             'id' => $request->id,
-                            'type' => strtolower($request->leaveType->code ?? ''),
-                            'status' => $status,
+                            'type' => $leaveCode,
+                            'acronym' => $acronym,
+                            'status' => $displayStatus,
                             'session' => $session,
                             'start_date' => $request->start_date,
                             'end_date' => $request->end_date,
@@ -160,8 +191,8 @@
                                                 <div class="weekend-indicator" title="Weekend"></div>
                                             @else
                                                 @foreach($dayLeaves as $leave)
-                                                    <div class="leave-dot {{ $leave['type'] }} {{ $leave['session'] }}">
-                                                        {{ $leave['session'] !== 'whole_day' ? strtoupper($leave['session'][0]) : '' }}
+                                                    <div class="leave-dot {{ $leave['status'] }}" title="{{ ucfirst($leave['type']) }} Leave ({{ ucfirst($leave['status']) }})">
+                                                        {{ $leave['status'] === 'pending' ? 'P' : $leave['acronym'] }}
                                                     </div>
                                                 @endforeach
                                             @endif
