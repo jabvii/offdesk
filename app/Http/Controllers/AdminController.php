@@ -180,7 +180,7 @@ public function index()
             ->where('status', 'approved')
             ->get();
 
-        $supervisors = User::where('is_supervisor', true)
+        $supervisors = User::where('role', 'supervisor')
             ->where('status', 'approved')
             ->get();
 
@@ -198,7 +198,6 @@ public function index()
             'role' => ['required', 'string', 'in:employee,supervisor,manager'],
             'supervisor_id' => ['nullable', 'exists:users,id'],
             'manager_id' => ['nullable', 'exists:users,id'],
-            'is_supervisor' => ['nullable', 'boolean'],
         ]);
 
         // Handle role-specific assignments
@@ -206,7 +205,7 @@ public function index()
             // Employee: needs both supervisor and manager
             if (!$validated['supervisor_id']) {
                 $supervisor = User::where('department', $validated['department'])
-                    ->where('is_supervisor', true)
+                    ->where('role', 'supervisor')
                     ->where('status', 'approved')
                     ->first();
                 if ($supervisor) {
@@ -237,8 +236,8 @@ public function index()
             // Supervisors are marked as supervisors
             $validated['is_supervisor'] = true;
         } elseif ($validated['role'] === 'manager') {
-            // Manager: optionally can supervise employees
-            $validated['is_supervisor'] = $request->has('is_supervisor') ? true : false;
+            // Manager: does not supervise employees directly
+            $validated['is_supervisor'] = false;
         }
 
         $user = User::create([

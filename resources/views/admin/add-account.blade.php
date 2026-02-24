@@ -179,14 +179,6 @@
                         <small>Managers who oversee the department</small>
                     </div>
 
-                    <!-- Is Supervisor Checkbox (for manager role) -->
-                    <div class="form-group" id="isSupervisorField" style="display: none;">
-                        <label for="is_supervisor">
-                            <input type="checkbox" name="is_supervisor" id="is_supervisor" value="1" @checked(old('is_supervisor'))>
-                            <span>This person can also supervise employees in their department</span>
-                        </label>
-                    </div>
-
                     <div class="manager-note" id="managerNote" style="display: none;">
                         <strong>Note:</strong> Managers oversee the department. Supervisors report to a manager and can supervise employees.
                     </div>
@@ -224,14 +216,12 @@ function toggleManagerField() {
     const roleSelect = document.getElementById('role');
     const managerField = document.getElementById('managerField');
     const supervisorField = document.getElementById('supervisorField');
-    const isSupervisorField = document.getElementById('isSupervisorField');
     const managerNote = document.getElementById('managerNote');
     const role = roleSelect.value;
 
     // Reset all visibility
     managerField.style.display = 'none';
     supervisorField.style.display = 'none';
-    isSupervisorField.style.display = 'none';
     managerNote.style.display = 'none';
 
     // Show/hide based on role
@@ -244,8 +234,7 @@ function toggleManagerField() {
         managerField.style.display = 'block';
         managerNote.style.display = 'block';
     } else if (role === 'manager') {
-        // Manager: can be marked as supervisor
-        isSupervisorField.style.display = 'block';
+        // Manager: no additional fields needed
         managerNote.style.display = 'block';
     }
 }

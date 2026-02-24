@@ -122,7 +122,6 @@
                     {{ $rejectedLeaves }}
                 </h3>
                 <p>Rejected Leaves</p>
-                <i class="fas fa-arrow-right arrow-icon"></i>
             </div>
             </div>
 
@@ -133,7 +132,6 @@
                     {{ $totalThisYear }}
                 </h3>
                 <p>Total Requests <br>(This Year)</p>
-                <i class="fas fa-arrow-right arrow-icon"></i>
             </div>
             </div>
 
