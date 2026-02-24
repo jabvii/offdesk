@@ -168,4 +168,30 @@ class SupervisorController extends Controller
             })->toArray(),
         ]);
     }
+
+    // View team members (employees assigned to this supervisor)
+    public function viewTeam()
+    {
+        $supervisor = Auth::user();
+        
+        // Get count for sidebar badge
+        $pendingCount = LeaveRequest::where('status', 'pending_supervisor')
+            ->whereIn('user_id', User::where('supervisor_id', $supervisor->id)->pluck('id'))
+            ->count();
+
+        // Get direct reports (employees assigned to this supervisor)
+        $employees = User::where('supervisor_id', $supervisor->id)
+            ->where('status', 'approved')
+            ->with(['manager'])
+            ->orderBy('name', 'asc')
+            ->get();
+
+        // Get the manager for this supervisor
+        $manager = $supervisor->manager;
+
+        // Get leave types for leave request modal
+        $leaveTypes = LeaveType::all();
+
+        return view('supervisor.team', compact('employees', 'pendingCount', 'supervisor', 'manager', 'leaveTypes'));
+    }
 }

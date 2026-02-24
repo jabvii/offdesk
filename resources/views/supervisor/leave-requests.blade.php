@@ -30,6 +30,7 @@
                         @endif
                     </a>
                 </li>
+                <li><a href="{{ route('supervisor.team') }}" @if(request()->routeIs('supervisor.team')) class="active" @endif>View Team</a></li>
                 <li><a href="{{ route('supervisor.leave.history') }}" @if(request()->routeIs('supervisor.leave.history')) class="active" @endif>Leave History</a></li>
             </ul>
         </div>

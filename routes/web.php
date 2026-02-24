@@ -87,6 +87,9 @@ Route::prefix('supervisor')->middleware(['auth', SupervisorMiddleware::class])->
     
     // Supervisor's own leave history
     Route::get('/leave-history', [SupervisorController::class, 'history'])->name('supervisor.leave.history');
+    
+    // View team (direct reports)
+    Route::get('/team', [SupervisorController::class, 'viewTeam'])->name('supervisor.team');
 });
 
 // This will catch invalid URLs like "/dashboasd"

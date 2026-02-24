@@ -4,34 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>OffDesk - View Team</title>
+    <title>OffDesk - My Team</title>
     <link rel="stylesheet" href="{{ asset('css/shared/globals.css') }}">
     <link rel="stylesheet" href="{{ asset('css/shared/sidebar.css') }}">
     <link rel="stylesheet" href="{{ asset('css/shared/buttons.css') }}">
     <link rel="stylesheet" href="{{ asset('css/shared/alerts.css') }}">
     <link rel="stylesheet" href="{{ asset('css/shared/modals.css') }}">
     <link rel="stylesheet" href="{{ asset('css/shared/forms.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/manager/team.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/supervisor/team.css') }}">
 </head>
 <body>
 <div class="dashboard-container">
     <!-- Sidebar -->
     <nav class="sidebar">
         <div class="nav-top">
-            <h2>OFFDesk Manager</h2>
+            <h2>OFFDesk Supervisor</h2>
             <ul class="nav-links">
-                <li><a href="{{ route('manager.dashboard') }}">Dashboard</a></li>
+                <li><a href="{{ route('supervisor.dashboard') }}">Dashboard</a></li>
                 <li><a href="#" id="openLeaveModalLink">Request Leave</a></li>
                 <li>
-                    <a href="{{ route('manager.leave.requests') }}">
+                    <a href="{{ route('supervisor.leave.requests') }}">
                         Requests
                         @if($pendingCount > 0)
                             <span class="badge">{{ $pendingCount }}</span>
                         @endif
                     </a>
                 </li>
-                <li><a href="{{ route('manager.team') }}" class="active">View Team</a></li>
-                <li><a href="{{ route('manager.leave.history') }}">Leave History</a></li>
+                <li><a href="{{ route('supervisor.team') }}" class="active">View Team</a></li>
+                <li><a href="{{ route('supervisor.leave.history') }}">Leave History</a></li>
             </ul>
         </div>
         <div class="nav-bottom">
@@ -59,59 +59,23 @@
 
             <div class="team-container">
                 <div class="team-header">
-                    <h2>{{ $manager->department }} Department Team</h2>
-                    <p class="team-subtitle">Total: {{ $supervisors->count() + $employees->count() }} members</p>
+                    <h2>My Team</h2>
+                    <p class="team-subtitle">{{ $employees->count() }} direct report(s) in {{ $supervisor->department }} Department</p>
                 </div>
 
-                <!-- Supervisors Section -->
-                @if($supervisors->count() > 0)
-                <div class="team-section">
-                    <h3 class="section-title">
-                        <span class="role-badge supervisor">Supervisors</span>
-                        <span class="member-count">({{ $supervisors->count() }})</span>
-                    </h3>
-                    <div class="team-table-wrapper">
-                        <table class="team-table">
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Email</th>
-                                    <th>Reports To</th>
-                                    <th>Joined</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($supervisors as $member)
-                                <tr>
-                                    <td>
-                                        <div class="member-name">
-                                            <span class="name">{{ $member->name }}</span>
-                                            @if($member->is_supervisor)
-                                                <span class="supervisor-badge">Can Supervise</span>
-                                            @endif
-                                        </div>
-                                    </td>
-                                    <td>{{ $member->email }}</td>
-                                    <td>
-                                        @if($member->manager)
-                                            {{ $member->manager->name }}
-                                        @else
-                                            <span class="no-manager">-</span>
-                                        @endif
-                                    </td>
-                                    <td>{{ $member->created_at->format('M d, Y') }}</td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
+                <!-- Manager Info -->
+                @if($manager)
+                <div class="manager-info">
+                    <span class="manager-label">Your Manager:</span>
+                    <span class="manager-name">{{ $manager->name }}</span>
+                    <span class="manager-email">({{ $manager->email }})</span>
                 </div>
                 @endif
 
-                <!-- Employees Section -->
+                <!-- Direct Reports Section -->
                 <div class="team-section">
                     <h3 class="section-title">
-                        <span class="role-badge employee">Employees</span>
+                        <span class="role-badge employee">Direct Reports</span>
                         <span class="member-count">({{ $employees->count() }})</span>
                     </h3>
                     @if($employees->count() > 0)
@@ -121,7 +85,6 @@
                                 <tr>
                                     <th>Name</th>
                                     <th>Email</th>
-                                    <th>Supervisor</th>
                                     <th>Manager</th>
                                     <th>Joined</th>
                                 </tr>
@@ -131,13 +94,6 @@
                                 <tr>
                                     <td>{{ $member->name }}</td>
                                     <td>{{ $member->email }}</td>
-                                    <td>
-                                        @if($member->supervisor)
-                                            {{ $member->supervisor->name }}
-                                        @else
-                                            <span class="no-supervisor">-</span>
-                                        @endif
-                                    </td>
                                     <td>
                                         @if($member->manager)
                                             {{ $member->manager->name }}
@@ -152,7 +108,7 @@
                         </table>
                     </div>
                     @else
-                    <p class="no-members">No employees in this department yet.</p>
+                    <p class="no-members">No employees assigned to you yet.</p>
                     @endif
                 </div>
             </div>

@@ -171,6 +171,9 @@ class ManagerController extends Controller
         $supervisors = $teamMembers->where('role', 'supervisor');
         $employees = $teamMembers->where('role', 'employee');
 
-        return view('manager.team', compact('supervisors', 'employees', 'pendingCount', 'manager'));
+        // Get leave types for leave request modal
+        $leaveTypes = LeaveType::all();
+
+        return view('manager.team', compact('supervisors', 'employees', 'pendingCount', 'manager', 'leaveTypes'));
     }
 }
