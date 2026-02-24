@@ -6,6 +6,7 @@ use App\Models\LeaveRequest;
 use App\Models\LeaveRequestSession;
 use App\Models\LeaveType;
 use App\Models\LeaveBalance;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -248,6 +249,44 @@ class LeaveRequestController extends Controller
         }
 
         return view('employee.leave-history', compact('allRequests', 'currentYear', 'leaveTypes'));
+    }
+
+    // View department members (for employees to see their team structure)
+    public function viewDepartment()
+    {
+        $user = Auth::user();
+        
+        // Get all members in the same department
+        $departmentMembers = User::where('department', $user->department)
+            ->where('id', '!=', $user->id)
+            ->where('is_admin', false)
+            ->where('status', 'approved')
+            ->with(['supervisor', 'manager'])
+            ->orderBy('role', 'asc')
+            ->orderBy('name', 'asc')
+            ->get();
+
+        // Separate by role for display
+        $managers = $departmentMembers->where('role', 'manager');
+        $supervisors = $departmentMembers->where('role', 'supervisor');
+        $employees = $departmentMembers->where('role', 'employee');
+
+        // Get user's own supervisor and manager for highlighting
+        $mySupervisor = $user->supervisor;
+        $myManager = $user->manager;
+
+        // Get leave types for leave request modal
+        $leaveTypes = LeaveType::all();
+
+        return view('employee.department', compact(
+            'managers', 
+            'supervisors', 
+            'employees', 
+            'user', 
+            'mySupervisor', 
+            'myManager',
+            'leaveTypes'
+        ));
     }
 
     // Helper function to calculate total days from sessions

@@ -35,6 +35,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/leave', [LeaveRequestController::class, 'store'])->name('leave.store');
     Route::post('/leave/{id}/cancel', [LeaveRequestController::class, 'cancel'])->name('leave.cancel');
     Route::get('/employee/leave-history', [LeaveRequestController::class, 'history'])->name('employee.leave.history');
+    
+    // View department members
+    Route::get('/employee/department', [LeaveRequestController::class, 'viewDepartment'])->name('employee.department');
 });
 
 // Admin Routes (auth + admin only)

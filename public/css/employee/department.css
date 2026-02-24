@@ -1,0 +1,230 @@
+/* Employee Department View Styles */
+
+.department-container {
+    background: transparent;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.department-header {
+    margin-bottom: 20px;
+}
+
+.department-header h2 {
+    color: white;
+    font-size: 24px;
+    margin-bottom: 8px;
+}
+
+.department-subtitle {
+    color: #9ca3af;
+    font-size: 14px;
+}
+
+/* Reporting Line Section */
+.reporting-line {
+    background: #1f2937;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+}
+
+.reporting-line h3 {
+    color: white;
+    font-size: 16px;
+    margin-bottom: 16px;
+}
+
+.reporting-chain {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.report-card {
+    background: #374151;
+    padding: 14px 20px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 180px;
+    border-left: 4px solid #6b7280;
+}
+
+.report-card.manager {
+    border-left-color: #B8956A;
+}
+
+.report-card.supervisor {
+    border-left-color: #7A9A7D;
+}
+
+.report-card.you {
+    border-left-color: #3b82f6;
+    background: #1e3a5f;
+}
+
+.report-role {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #9ca3af;
+    font-weight: 600;
+}
+
+.report-name {
+    color: white;
+    font-weight: 600;
+    font-size: 15px;
+}
+
+.report-email {
+    color: #9ca3af;
+    font-size: 12px;
+}
+
+.chain-arrow {
+    color: #6b7280;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+/* Team Sections */
+.team-section {
+    margin-bottom: 40px;
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    color: white;
+}
+
+.role-badge {
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.role-badge.manager {
+    background: #B8956A;
+    color: white;
+}
+
+.role-badge.supervisor {
+    background: #7A9A7D;
+    color: white;
+}
+
+.role-badge.employee {
+    background: #5B8DBE;
+    color: white;
+}
+
+.member-count {
+    color: #9ca3af;
+    font-size: 14px;
+    font-weight: normal;
+}
+
+.team-table-wrapper {
+    overflow-x: auto;
+}
+
+.team-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #1f2937;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.team-table th,
+.team-table td {
+    padding: 14px 16px;
+    text-align: left;
+    border-bottom: 1px solid #374151;
+}
+
+.team-table th {
+    background: #374151;
+    color: #d1d5db;
+    font-weight: 600;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.team-table td {
+    color: #e5e7eb;
+    font-size: 14px;
+}
+
+.team-table tbody tr:hover {
+    background: #374151;
+}
+
+.team-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Highlight row for user's own supervisor/manager */
+.highlight-row {
+    background: rgba(59, 130, 246, 0.1) !important;
+}
+
+.highlight-row:hover {
+    background: rgba(59, 130, 246, 0.2) !important;
+}
+
+.your-tag {
+    background: #3b82f6;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 500;
+    margin-left: 8px;
+}
+
+.no-supervisor,
+.no-manager {
+    color: #6b7280;
+    font-style: italic;
+}
+
+.no-members {
+    color: #9ca3af;
+    padding: 20px;
+    text-align: center;
+    background: #1f2937;
+    border-radius: 8px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .reporting-chain {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .chain-arrow {
+        transform: rotate(90deg);
+        text-align: center;
+    }
+    
+    .report-card {
+        min-width: auto;
+    }
+
+    .team-table th,
+    .team-table td {
+        padding: 10px 12px;
+        font-size: 13px;
+    }
+}
