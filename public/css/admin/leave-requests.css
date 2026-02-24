@@ -213,3 +213,318 @@
     background: rgba(149, 165, 166, 0.2);
     color: #95a5a6;
 }
+
+/* Details Modal Styles */
+.details-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+.details-modal.active {
+    display: flex;
+}
+
+.details-modal-content {
+    background: #2c2c2c;
+    border-radius: 12px;
+    padding: 24px;
+    max-width: 700px;
+    width: 95%;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.details-modal .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #444;
+    padding-bottom: 12px;
+}
+
+.details-modal .modal-header h2 {
+    margin: 0;
+    color: white;
+    font-size: 1.4rem;
+}
+
+.details-modal .modal-close {
+    background: none;
+    border: none;
+    color: #999;
+    font-size: 28px;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+}
+
+.details-modal .modal-close:hover {
+    color: white;
+}
+
+.details-section {
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #3a3a3a;
+}
+
+.details-section:last-of-type {
+    border-bottom: none;
+}
+
+.details-section h3 {
+    color: #3498db;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0 0 12px 0;
+}
+
+.details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.detail-label {
+    color: #888;
+    font-size: 12px;
+    text-transform: uppercase;
+}
+
+.detail-value {
+    color: white;
+    font-size: 14px;
+}
+
+.leave-type-badge.vacation-leave {
+    background: #3498db;
+    color: white;
+}
+
+.leave-type-badge.sick-leave {
+    background: #f39c12;
+    color: white;
+}
+
+.leave-type-badge.emergency-leave {
+    background: #e74c3c;
+    color: white;
+}
+
+.leave-type-badge.paternity-leave {
+    background: #9b59b6;
+    color: white;
+}
+
+.leave-type-badge.parental-leave {
+    background: #1abc9c;
+    color: white;
+}
+
+.leave-type-badge.service-incentive-leave {
+    background: #95a5a6;
+    color: white;
+}
+
+.sessions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.session-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: #3a3a3a;
+    border-radius: 6px;
+}
+
+.session-item.weekend {
+    background: #2a2a2a;
+    opacity: 0.6;
+}
+
+.session-date {
+    color: #ccc;
+    font-size: 13px;
+}
+
+.session-type {
+    color: #3498db;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.session-item.weekend .session-type {
+    color: #888;
+}
+
+.reason-box {
+    background: #3a3a3a;
+    border-radius: 8px;
+    padding: 16px;
+    color: #e5e7eb;
+    font-size: 14px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+}
+
+.submission-info {
+    color: #888;
+    font-size: 13px;
+    margin: 0;
+}
+
+/* Tracking Chain in Details Modal */
+.tracking-chain {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: 0 10px;
+}
+
+.tracking-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 12px 0;
+}
+
+.step-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 16px;
+    flex-shrink: 0;
+    background: #444;
+    color: #999;
+}
+
+.tracking-step.completed .step-icon {
+    background: #27ae60;
+    color: white;
+}
+
+.tracking-step.current .step-icon {
+    background: #3498db;
+    color: white;
+    animation: pulse 2s infinite;
+}
+
+.tracking-step.rejected .step-icon {
+    background: #e74c3c;
+    color: white;
+}
+
+.tracking-step.waiting .step-icon {
+    background: #555;
+    color: #888;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(52, 152, 219, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 0 8px rgba(52, 152, 219, 0);
+    }
+}
+
+.step-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+}
+
+.step-role {
+    font-weight: bold;
+    color: white;
+    font-size: 14px;
+}
+
+.step-name {
+    color: #bbb;
+    font-size: 13px;
+}
+
+.step-detail {
+    color: #888;
+    font-size: 12px;
+}
+
+.step-detail.pending-text {
+    color: #3498db;
+}
+
+.step-remarks {
+    color: #f39c12;
+    font-size: 12px;
+    font-style: italic;
+    margin-top: 4px;
+}
+
+.chain-connector {
+    width: 2px;
+    height: 20px;
+    background: #444;
+    margin-left: 17px;
+}
+
+.chain-connector.completed {
+    background: #27ae60;
+}
+
+.chain-connector.current {
+    background: linear-gradient(to bottom, #27ae60, #3498db);
+}
+
+.chain-connector.waiting {
+    background: #444;
+}
+
+.modal-footer {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid #444;
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* View Details Button */
+.btn-view-details {
+    padding: 8px 12px;
+    font-size: 16px;
+    background: #3498db !important;
+    color: white !important;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-view-details:hover {
+    background: #2980b9 !important;
+}

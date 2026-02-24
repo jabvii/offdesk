@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="{{ asset('css/shared/modals.css') }}">
     <link rel="stylesheet" href="{{ asset('css/shared/forms.css') }}">
     <link rel="stylesheet" href="{{ asset('css/manager/leave-requests.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
 <div class="dashboard-container">
@@ -68,8 +69,7 @@
                             <th>Dates</th>
                             <th>Days</th>
                             <th>Request Type</th>
-                            <th>Supervisor Approval</th>
-                            <th>Reason</th>
+                            <th>Details</th>
                             <th>Action</th>
                         </tr>
                     </thead>
@@ -78,11 +78,7 @@
                         <tr>
                             <td>{{ $leave->user->name }}<br><small style="color: #888;">{{ $leave->user->department }}</small></td>
                             <td>{{ $leave->leaveType->name }}</td>
-                            <td>
-                                {{ \Carbon\Carbon::parse($leave->start_date)->format('M d, Y') }} → {{ \Carbon\Carbon::parse($leave->end_date)->format('M d, Y') }}
-                                <br>
-                                <button type="button" class="view-sessions-btn" data-leave-id="{{ $leave->id }}" style="margin-top: 5px; padding: 3px 6px; font-size: 12px;">View Sessions</button>
-                            </td>
+                            <td>{{ \Carbon\Carbon::parse($leave->start_date)->format('M d, Y') }} → {{ \Carbon\Carbon::parse($leave->end_date)->format('M d, Y') }}</td>
                             <td>{{ $leave->total_days }}</td>
                             <td>
                                 @if($leave->user->isSupervisor())
@@ -92,19 +88,8 @@
                                 @endif
                             </td>
                             <td>
-                                @if($leave->status === 'supervisor_approved_pending_manager' && $leave->supervisor)
-                                    <span style="background: #28a745; color: white; padding: 3px 8px; border-radius: 3px; font-size: 12px;">Approved</span><br>
-                                    <strong>{{ $leave->supervisor->name }}</strong><br>
-                                    <small style="color: #888;">{{ $leave->supervisor_remarks ?? 'No remarks' }}</small>
-                                @elseif($leave->status === 'pending_supervisor')
-                                    <span style="background: #ffc107; color: #333; padding: 3px 8px; border-radius: 3px; font-size: 12px;">Awaiting Supervisor</span>
-                                @elseif($leave->user->isSupervisor())
-                                    <small style="color: #888;">N/A (Supervisor's own request)</small>
-                                @else
-                                    <small style="color: #888;">Direct to manager</small>
-                                @endif
+                                <button type="button" class="btn btn-view-details" onclick="openDetailsModal({{ $leave->id }})" title="View Details"><i class="fas fa-eye"></i></button>
                             </td>
-                            <td>{{ $leave->reason }}</td>
                             <td>
                                 @if($leave->status === 'pending_supervisor')
                                     <span style="color: #888; font-style: italic;">Waiting for supervisor</span>
@@ -114,9 +99,163 @@
                                 @endif
                             </td>
                         </tr>
+
+                        <!-- Details Modal for this request -->
+                        <div class="modal details-modal" id="detailsModal{{ $leave->id }}">
+                            <div class="modal-content details-modal-content">
+                                <div class="modal-header">
+                                    <h2>Leave Request Details</h2>
+                                    <button type="button" class="modal-close" onclick="closeDetailsModal({{ $leave->id }})">&times;</button>
+                                </div>
+                                
+                                <div class="details-section">
+                                    <h3>Employee Information</h3>
+                                    <div class="details-grid">
+                                        <div class="detail-item">
+                                            <span class="detail-label">Name</span>
+                                            <span class="detail-value">{{ $leave->user->name }}</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <span class="detail-label">Department</span>
+                                            <span class="detail-value">{{ $leave->user->department ?? 'N/A' }}</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <span class="detail-label">Email</span>
+                                            <span class="detail-value">{{ $leave->user->email }}</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <span class="detail-label">Role</span>
+                                            <span class="detail-value">{{ $leave->user->isSupervisor() ? 'Supervisor' : 'Employee' }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="details-section">
+                                    <h3>Leave Details</h3>
+                                    <div class="details-grid">
+                                        <div class="detail-item">
+                                            <span class="detail-label">Leave Type</span>
+                                            <span class="detail-value leave-type-badge {{ strtolower(str_replace(' ', '-', $leave->leaveType->name)) }}">{{ $leave->leaveType->name }}</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <span class="detail-label">Duration</span>
+                                            <span class="detail-value">{{ $leave->total_days }} day(s)</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <span class="detail-label">Start Date</span>
+                                            <span class="detail-value">{{ \Carbon\Carbon::parse($leave->start_date)->format('M d, Y (l)') }}</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <span class="detail-label">End Date</span>
+                                            <span class="detail-value">{{ \Carbon\Carbon::parse($leave->end_date)->format('M d, Y (l)') }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="details-section">
+                                    <h3>Daily Sessions</h3>
+                                    <div class="sessions-list">
+                                        @php
+                                            $sessions = $leave->sessions ?? collect();
+                                            $sessionMap = $sessions->keyBy(fn($s) => $s->date->format('Y-m-d'));
+                                            $start = \Carbon\Carbon::parse($leave->start_date);
+                                            $end = \Carbon\Carbon::parse($leave->end_date);
+                                        @endphp
+                                        @for($date = $start->copy(); $date->lte($end); $date->addDay())
+                                            @php
+                                                $dateStr = $date->format('Y-m-d');
+                                                $isWeekend = $date->isWeekend();
+                                                $session = $sessionMap->get($dateStr);
+                                                $sessionType = $session ? $session->session : 'whole_day';
+                                            @endphp
+                                            <div class="session-item {{ $isWeekend ? 'weekend' : '' }}">
+                                                <span class="session-date">{{ $date->format('M d, Y') }} ({{ $date->format('l') }})</span>
+                                                <span class="session-type">
+                                                    @if($isWeekend)
+                                                        <em>Weekend</em>
+                                                    @else
+                                                        {{ $sessionType === 'whole_day' ? 'Whole Day' : ucfirst($sessionType) }}
+                                                    @endif
+                                                </span>
+                                            </div>
+                                        @endfor
+                                    </div>
+                                </div>
+
+                                <div class="details-section">
+                                    <h3>Reason</h3>
+                                    <div class="reason-box">
+                                        {{ $leave->reason }}
+                                    </div>
+                                </div>
+
+                                <div class="details-section">
+                                    <h3>Request Tracking</h3>
+                                    @php
+                                        $isSupervisorRequest = $leave->user->isSupervisor();
+                                        $employeeSupervisor = $leave->user->supervisor;
+                                        $hasSupervisorInChain = !$isSupervisorRequest && $employeeSupervisor;
+                                    @endphp
+                                    <div class="tracking-chain">
+                                        <div class="tracking-step completed">
+                                            <div class="step-icon">✓</div>
+                                            <div class="step-info">
+                                                <span class="step-role">{{ $isSupervisorRequest ? 'Supervisor' : 'Employee' }}</span>
+                                                <span class="step-name">{{ $leave->user->name }}</span>
+                                                <span class="step-detail">Submitted {{ $leave->created_at->format('M d, Y h:i A') }}</span>
+                                            </div>
+                                        </div>
+
+                                        @if($hasSupervisorInChain)
+                                        <div class="chain-connector completed"></div>
+                                        <div class="tracking-step completed">
+                                            <div class="step-icon">✓</div>
+                                            <div class="step-info">
+                                                <span class="step-role">Supervisor</span>
+                                                <span class="step-name">{{ $employeeSupervisor->name }}</span>
+                                                <span class="step-detail">Approved</span>
+                                                @if($leave->supervisor_remarks)
+                                                    <span class="step-remarks">"{{ $leave->supervisor_remarks }}"</span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                        @endif
+
+                                        <div class="chain-connector current"></div>
+                                        <div class="tracking-step current">
+                                            <div class="step-icon">●</div>
+                                            <div class="step-info">
+                                                <span class="step-role">Manager (You)</span>
+                                                <span class="step-name">{{ auth()->user()->name }}</span>
+                                                <span class="step-detail pending-text">Awaiting your decision</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="chain-connector waiting"></div>
+                                        <div class="tracking-step waiting">
+                                            <div class="step-icon">{{ $hasSupervisorInChain ? '4' : '3' }}</div>
+                                            <div class="step-info">
+                                                <span class="step-role">Admin</span>
+                                                <span class="step-name">Final Approval</span>
+                                                <span class="step-detail">Pending</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="details-section">
+                                    <h3>Submission Info</h3>
+                                    <p class="submission-info">Submitted on {{ $leave->created_at->format('F d, Y \a\t h:i A') }}</p>
+                                </div>
+
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" onclick="closeDetailsModal({{ $leave->id }})">Close</button>
+                                </div>
+                            </div>
+                        </div>
                         @empty
                         <tr>
-                            <td colspan="8">No pending requests 🎉</td>
+                            <td colspan="7">No pending requests 🎉</td>
                         </tr>
                         @endforelse
                     </tbody>
@@ -195,27 +334,24 @@
     </div>
 </div>
 
-<!-- View Sessions Modal -->
-<div id="viewSessionsModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3>Daily Sessions</h3>
-            <button type="button" class="close-sessions-btn">&times;</button>
-        </div>
-        <table border="1" cellpadding="8" cellspacing="0" style="width: 100%; margin-top: 10px;">
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Session</th>
-                </tr>
-            </thead>
-            <tbody id="sessionsTableBodyModal"></tbody>
-        </table>
-    </div>
-</div>
-
 <script src="{{ asset('js/dashboard.js') }}"></script>
 <script>
+// Details Modal functions
+function openDetailsModal(id) {
+    document.getElementById('detailsModal' + id).classList.add('active');
+}
+
+function closeDetailsModal(id) {
+    document.getElementById('detailsModal' + id).classList.remove('active');
+}
+
+// Close details modal when clicking outside
+document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('details-modal')) {
+        e.target.classList.remove('active');
+    }
+});
+
 function confirmLogout() {
     return confirm("Are you sure you want to logout?");
 }
@@ -284,7 +420,6 @@ endDateInput.addEventListener('change', generateSessionsTable);
 
 // Approve/Reject Modal
 const actionModal = document.getElementById('actionModal');
-const viewSessionsModal = document.getElementById('viewSessionsModal');
 const modalTitle = document.getElementById('actionTitle');
 const form = document.getElementById('actionForm');
 const statusInput = document.getElementById('actionStatus');
@@ -308,73 +443,12 @@ document.querySelector('.conf-btn').addEventListener('click', function() {
 document.querySelectorAll('.canc-btn').forEach(btn => btn.addEventListener('click', ()=> actionModal.style.display='none'));
 actionModal.addEventListener('click', e => { if(e.target === actionModal) actionModal.style.display='none'; });
 
-// View Sessions Modal
-document.querySelector('.close-sessions-btn').addEventListener('click', ()=> viewSessionsModal.style.display='none');
-document.querySelectorAll('.view-sessions-btn').forEach(button => {
-    button.addEventListener('click', function() {
-        const leaveId = this.dataset.leaveId;
-        fetch(`/manager/leave-requests/${leaveId}/sessions`)
-            .then(res => res.json())
-            .then(data => {
-                const body = document.getElementById('sessionsTableBodyModal');
-                body.innerHTML = '';
-
-                const startDate = new Date(data.start_date + 'T00:00:00');
-                const endDate = new Date(data.end_date + 'T00:00:00');
-
-                // Create a map of sessions by date for quick lookup
-                const sessionMap = {};
-                data.sessions.forEach(s => {
-                    sessionMap[s.date] = s.session;
-                });
-
-                const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-
-                // Generate all dates in range
-                let currentDate = new Date(startDate);
-                while(currentDate <= endDate) {
-                    // Construct date string in local timezone to match database
-                    const year = currentDate.getFullYear();
-                    const month = String(currentDate.getMonth() + 1).padStart(2, '0');
-                    const day = String(currentDate.getDate()).padStart(2, '0');
-                    const dateStr = `${year}-${month}-${day}`;
-
-                    const formattedDate = currentDate.toLocaleDateString('en-US', {year:'numeric', month:'2-digit', day:'2-digit'});
-                    const dayOfWeek = currentDate.getDay();
-                    const dayName = dayNames[dayOfWeek];
-                    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-
-                    const row = document.createElement('tr');
-
-                    if(isWeekend) {
-                        row.style.backgroundColor = '#f0f0f0';
-                        row.style.color = '#999';
-                        row.innerHTML = `
-                            <td>${formattedDate} <span style="font-weight: normal; color: #999;">(${dayName})</span></td>
-                            <td><span style="font-style: italic; color: #aaa;">Weekend</span></td>
-                        `;
-                    } else {
-                        const session = sessionMap[dateStr] || 'whole_day';
-                        const sessionDisplay = session === 'whole_day' ? 'Whole Day' : session.charAt(0).toUpperCase() + session.slice(1);
-                        row.innerHTML = `<td>${formattedDate} <span style="font-weight: normal; color: #666;">(${dayName})</span></td><td>${sessionDisplay}</td>`;
-                    }
-
-                    body.appendChild(row);
-                    currentDate.setDate(currentDate.getDate() + 1);
-                }
-
-                viewSessionsModal.style.display='flex';
-            })
-            .catch(()=> alert('Error loading sessions'));
-    });
-});
-
 // Close all modals on Escape
 document.addEventListener('keydown', e=>{
     if(e.key==='Escape'){
         leaveRequestModal.style.display='none';
         actionModal.style.display='none';
-        viewSessionsModal.style.display='none';
+        document.querySelectorAll('.details-modal.active').forEach(modal => modal.classList.remove('active'));
     }
 });
 </script>
