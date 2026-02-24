@@ -98,6 +98,33 @@
     max-width: 90%;
 }
 
+/* Remarks dropdown styling */
+.remarks-select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    background: white;
+    cursor: pointer;
+    margin-bottom: 10px;
+}
+
+.remarks-select:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+.remarks-select optgroup {
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.remarks-select option {
+    padding: 8px;
+}
+
 #sessionsTableContainer {
     margin-top: 20px;
 }

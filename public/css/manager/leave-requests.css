@@ -117,29 +117,34 @@
 
 /* Action buttons in table */
 .action-btn {
-    padding: 6px 10px;
+    width: 32px;
+    height: 32px;
     margin: 2px;
     cursor: pointer;
     border: none;
-    border-radius: 4px;
+    border-radius: 50%;
     font-weight: 600;
     transition: all 0.3s;
     color: white;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
 }
 
-.action-btn[data-action="approved"] {
+.action-btn.action-approve {
     background-color: #27ae60;
 }
 
-.action-btn[data-action="approved"]:hover {
+.action-btn.action-approve:hover {
     background-color: #229954;
 }
 
-.action-btn[data-action="rejected"] {
+.action-btn.action-reject {
     background-color: #e74c3c;
 }
 
-.action-btn[data-action="rejected"]:hover {
+.action-btn.action-reject:hover {
     background-color: #c0392b;
 }
 

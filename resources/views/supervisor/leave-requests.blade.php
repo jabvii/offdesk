@@ -61,7 +61,7 @@
             <h2 class="dblue">Pending Leave Requests (Awaiting Supervisor Approval)</h2>
 
             <div class="requests-table-wrapper">
-                <table border="1" cellpadding="8" cellspacing="0" class="requests-table">
+                <table class="requests-table">
                     <thead>
                         <tr>
                             <th>Employee</th>
@@ -83,8 +83,8 @@
                                 <button type="button" class="btn btn-view-details" onclick="openDetailsModal({{ $leave->id }})" title="View Details"><i class="fas fa-eye"></i></button>
                             </td>
                             <td>
-                                <button class="action-btn" data-id="{{ $leave->id }}" data-action="approved">Approve</button>
-                                <button class="action-btn" data-id="{{ $leave->id }}" data-action="rejected">Reject</button>
+                                <button class="action-btn action-approve" data-id="{{ $leave->id }}" data-action="approved" title="Approve"><i class="fas fa-check"></i></button>
+                                <button class="action-btn action-reject" data-id="{{ $leave->id }}" data-action="rejected" title="Reject"><i class="fas fa-times"></i></button>
                             </td>
                         </tr>
 
@@ -255,7 +255,20 @@
         <form id="actionForm" method="POST">
             @csrf
             <input type="hidden" name="status" id="actionStatus">
-            <textarea name="supervisor_remarks" id="remarks" rows="4" placeholder="Enter reason or remarks..." required></textarea>
+            <select name="supervisor_remarks" id="remarks" class="remarks-select" required>
+                <option value="">-- Select Remarks --</option>
+                <optgroup label="Approval" id="approvalOptions">
+                    <option value="Approved as requested.">Approved as requested.</option>
+                    <option value="Leave approved. Enjoy your time off.">Leave approved. Enjoy your time off.</option>
+                    <option value="Approved. Please ensure proper handover.">Approved. Please ensure proper handover.</option>
+                </optgroup>
+                <optgroup label="Rejection" id="rejectionOptions">
+                    <option value="Insufficient leave balance.">Insufficient leave balance.</option>
+                    <option value="Request conflicts with team schedule.">Request conflicts with team schedule.</option>
+                    <option value="Peak period - leave not permitted.">Peak period - leave not permitted.</option>
+                    <option value="Please resubmit with correct dates.">Please resubmit with correct dates.</option>
+                </optgroup>
+            </select>
             <div class="modal-actions">
                 <button type="button" class="conf-btn">Confirm</button>
                 <button type="button" class="canc-btn">Cancel</button>
@@ -354,6 +367,8 @@ const modalTitle = document.getElementById('actionTitle');
 const form = document.getElementById('actionForm');
 const statusInput = document.getElementById('actionStatus');
 const remarks = document.getElementById('remarks');
+const approvalOptions = document.getElementById('approvalOptions');
+const rejectionOptions = document.getElementById('rejectionOptions');
 
 document.querySelectorAll('.action-btn').forEach(button => {
     button.addEventListener('click', function() {
@@ -363,11 +378,21 @@ document.querySelectorAll('.action-btn').forEach(button => {
         statusInput.value = action;
         form.action = `/supervisor/leave-requests/${leaveId}/decision`;
         remarks.value = '';
+        
+        // Show/hide relevant options based on action
+        if (action === 'approved') {
+            approvalOptions.style.display = '';
+            rejectionOptions.style.display = 'none';
+        } else {
+            approvalOptions.style.display = 'none';
+            rejectionOptions.style.display = '';
+        }
+        
         actionModal.style.display = 'flex';
     });
 });
 document.querySelector('.conf-btn').addEventListener('click', function() {
-    if(remarks.value.trim() === '') { alert('Enter remarks'); return; }
+    if(remarks.value.trim() === '') { alert('Please select remarks'); return; }
     form.submit();
 });
 document.querySelectorAll('.canc-btn').forEach(btn => btn.addEventListener('click', ()=> actionModal.style.display='none'));

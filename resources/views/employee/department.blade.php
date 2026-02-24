@@ -55,34 +55,6 @@
                     <p class="department-subtitle">{{ $managers->count() + $supervisors->count() + $employees->count() + 1 }} members (including you)</p>
                 </div>
 
-                <!-- Your Reporting Line -->
-                <div class="reporting-line">
-                    <h3>Your Reporting Line</h3>
-                    <div class="reporting-chain">
-                        @if($myManager)
-                        <div class="report-card manager">
-                            <span class="report-role">Manager</span>
-                            <span class="report-name">{{ $myManager->name }}</span>
-                            <span class="report-email">{{ $myManager->email }}</span>
-                        </div>
-                        <div class="chain-arrow">→</div>
-                        @endif
-                        @if($mySupervisor)
-                        <div class="report-card supervisor">
-                            <span class="report-role">Supervisor</span>
-                            <span class="report-name">{{ $mySupervisor->name }}</span>
-                            <span class="report-email">{{ $mySupervisor->email }}</span>
-                        </div>
-                        <div class="chain-arrow">→</div>
-                        @endif
-                        <div class="report-card you">
-                            <span class="report-role">You</span>
-                            <span class="report-name">{{ $user->name }}</span>
-                            <span class="report-email">{{ $user->email }}</span>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Manager Section -->
                 @if($managers->count() > 0)
                 <div class="team-section">
