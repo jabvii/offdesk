@@ -129,7 +129,7 @@
 
 .calendar-table th:first-child,
 .calendar-table td:first-child {
-    width: 100px;
+    width: 80px;
     min-width: 100px;
     white-space: nowrap;
 }
