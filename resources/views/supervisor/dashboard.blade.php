@@ -215,10 +215,10 @@
                 </div>
             </div>
 
-            <!-- Your Leave Requests -->
+            <!-- Recent Leave Requests -->
             <div class="leave-requests-list">
-                <h2>Your Leave Requests</h2>
-                @forelse($leaveRequests->sortByDesc('created_at')->take(5) as $request)
+                <h2>Recent Leave Requests</h2>
+                @forelse($leaveRequests->sortByDesc('created_at')->take(3) as $request)
                     <div class="leave-request-item">
                         <div class="leave-request-info">
                             <h4 class="{{ strtolower($request->leaveType->code) }}">{{ $request->leaveType->name }}</h4>
@@ -410,7 +410,7 @@
                         </div>
                     </div>
                 @empty
-                    <p id="no-requests-message">No leave requests yet.</p>
+                    <p class="no-requests">No leave requests yet</p>
                 @endforelse
             </div>
         </div>

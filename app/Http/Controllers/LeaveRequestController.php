@@ -243,7 +243,7 @@ class LeaveRequestController extends Controller
         $allRequests = LeaveRequest::where('user_id', $user->id)
             ->with(['leaveType', 'sessions'])
             ->orderBy('created_at', 'desc')
-            ->paginate(15);
+            ->paginate(5);
 
         $leaveTypes = LeaveType::all();
 

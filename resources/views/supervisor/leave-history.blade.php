@@ -257,8 +257,20 @@
 
                 <!-- Pagination -->
                 @if($allRequests->hasPages())
-                    <div class="pagination">
-                        {{ $allRequests->links('pagination::bootstrap-4') }}
+                    <div class="pagination-simple">
+                        @if($allRequests->onFirstPage())
+                            <span class="pagination-arrow disabled"><i class="fas fa-chevron-left"></i></span>
+                        @else
+                            <a href="{{ $allRequests->previousPageUrl() }}" class="pagination-arrow"><i class="fas fa-chevron-left"></i></a>
+                        @endif
+                        
+                        <span class="pagination-info">Page {{ $allRequests->currentPage() }} of {{ $allRequests->lastPage() }}</span>
+                        
+                        @if($allRequests->hasMorePages())
+                            <a href="{{ $allRequests->nextPageUrl() }}" class="pagination-arrow"><i class="fas fa-chevron-right"></i></a>
+                        @else
+                            <span class="pagination-arrow disabled"><i class="fas fa-chevron-right"></i></span>
+                        @endif
                     </div>
                 @endif
             </div>
