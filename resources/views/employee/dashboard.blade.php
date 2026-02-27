@@ -230,7 +230,7 @@
  
                         <div class="leave-request-actions">
                             <span class="status-badge status-{{ $request->status }}">
-                                {{ ucfirst(str_replace('_', ' ', $request->status)) }}
+                                {{ $request->status === 'supervisor_approved_pending_manager' ? 'Pending manager' : ucfirst(str_replace('_', ' ', $request->status)) }}
                             </span>
                             <button type="button" class="btn btn-secondary btn-track" onclick="openTrackingModal({{ $request->id }})" title="Track Request"><i class="fas fa-question"></i></button>
                             @if(in_array($request->status, ['pending_supervisor', 'pending_manager', 'pending_admin', 'supervisor_approved_pending_manager']))

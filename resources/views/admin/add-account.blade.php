@@ -202,12 +202,37 @@ function confirmCreateAccount() {
     const name = document.getElementById('name').value;
     const role = document.getElementById('role').value;
     const department = document.getElementById('department').value;
-    
+    const supervisorSelect = document.getElementById('supervisor_id');
+    const managerSelect = document.getElementById('manager_id');
+
     if (!name || !role || !department) {
         alert('Please fill in all required fields.');
         return false;
     }
-    
+
+    // Only check for employee role
+    if (role === 'employee') {
+        // Check if there are visible supervisors and managers for the department
+        let hasSupervisor = false;
+        let hasManager = false;
+        // Check supervisors
+        const supervisorOptions = supervisorSelect.querySelectorAll('option');
+        supervisorOptions.forEach((option, index) => {
+            if (index === 0) return; // skip auto-assign
+            if (option.style.display !== 'none') hasSupervisor = true;
+        });
+        // Check managers
+        const managerOptions = managerSelect.querySelectorAll('option');
+        managerOptions.forEach((option, index) => {
+            if (index === 0) return; // skip auto-assign
+            if (option.style.display !== 'none') hasManager = true;
+        });
+        if (!hasSupervisor || !hasManager) {
+            alert('No existing supervisor/manager in the selected department.');
+            return false;
+        }
+    }
+
     const message = `Are you sure you want to create a ${role} account for ${name} in ${department}?`;
     return confirm(message);
 }

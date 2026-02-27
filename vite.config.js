@@ -14,11 +14,8 @@ export default defineConfig({
         host: '192.168.101.196',
         cors: {
             origin: '*',
-            method: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-            allowedHeaders: ['*'],
-        },
-        watch: {
-            ignored: ['**/storage/framework/views/**'],
+            method: ['GET', 'HEAD', 'PUT', 'POST', 'DELETE', 'PATCH'],
+            allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
         },
     },
 });

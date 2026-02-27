@@ -91,7 +91,7 @@
 
                         <div class="leave-request-actions">
                             <span class="status-badge status-{{ str_replace('_', '-', $request->status) }}">
-                                {{ ucfirst(str_replace('_', ' ', $request->status)) }}
+                                {{ $request->status === 'supervisor_approved_pending_manager' ? 'Pending manager' : ucfirst(str_replace('_', ' ', $request->status)) }}
                             </span>
                             <button type="button" class="btn btn-track" onclick="openTrackingModal({{ $request->id }})" title="Track Request"><i class="fas fa-question"></i></button>
                         </div>
@@ -108,7 +108,7 @@
                                 <p><strong>{{ $request->leaveType->name }}</strong></p>
                                 <p>{{ \Carbon\Carbon::parse($request->start_date)->format('M d, Y') }} - {{ \Carbon\Carbon::parse($request->end_date)->format('M d, Y') }}</p>
                                 <p class="tracking-status status-{{ $request->status }}">
-                                    Status: {{ ucfirst(str_replace('_', ' ', $request->status)) }}
+                                    Status: {{ $request->status === 'supervisor_approved_pending_manager' ? 'Pending manager' : ucfirst(str_replace('_', ' ', $request->status)) }}
                                 </p>
                             </div>
 

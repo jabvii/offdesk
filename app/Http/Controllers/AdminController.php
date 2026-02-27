@@ -29,8 +29,8 @@ public function index()
 
     // Approved Leaves (This Month)
     $approvedThisMonth = LeaveRequest::where('status', 'approved')
-        ->whereYear('start_date', $currentYear)
-        ->whereMonth('start_date', $currentMonth)
+        ->whereYear('updated_at', $currentYear)
+        ->whereMonth('updated_at', $currentMonth)
         ->count();
 
     // Rejected Leaves
@@ -159,8 +159,8 @@ public function index()
         
         $approvedRequests = LeaveRequest::with(['user', 'leaveType'])
             ->where('status', 'approved')
-            ->whereYear('start_date', $currentYear)
-            ->whereMonth('start_date', $currentMonth)
+            ->whereYear('updated_at', $currentYear)
+            ->whereMonth('updated_at', $currentMonth)
             ->orderBy('updated_at', 'desc')
             ->get();
         
