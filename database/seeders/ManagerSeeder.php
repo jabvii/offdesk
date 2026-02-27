@@ -15,7 +15,7 @@ class ManagerSeeder extends Seeder
         
         if (!$manager) {
             $manager = User::create([
-                'name' => 'Manager',
+                'name' => 'John',
                 'email' => $managerEmail,
                 'password' => bcrypt('password123'),
                 'is_admin' => false,

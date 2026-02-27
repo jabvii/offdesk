@@ -76,6 +76,8 @@ Route::prefix('manager')->middleware(['auth', ManagerMiddleware::class])->group(
     
     // View team members
     Route::get('/team', [ManagerController::class, 'viewTeam'])->name('manager.team');
+    // Assign supervisor to employee
+    Route::post('/team/assign-supervisor/{employee}', [ManagerController::class, 'assignSupervisor'])->name('manager.assign.supervisor');
 });
 
 // Supervisor Routes (auth + supervisor only)

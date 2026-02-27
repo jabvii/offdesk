@@ -176,4 +176,31 @@ class ManagerController extends Controller
 
         return view('manager.team', compact('supervisors', 'employees', 'pendingCount', 'manager', 'leaveTypes'));
     }
+
+    // Assign supervisor to employee
+    public function assignSupervisor(Request $request, User $employee)
+    {
+        $manager = Auth::user();
+        // Only allow assignment within manager's department and to employees
+        if ($employee->department !== $manager->department || $employee->role !== 'employee') {
+            return redirect()->back()->with('error', 'Invalid employee selection.');
+        }
+        $request->validate([
+            'supervisor_id' => 'nullable|exists:users,id',
+        ]);
+        $supervisorId = $request->input('supervisor_id');
+        // Only allow supervisors from the same department
+        if ($supervisorId) {
+            $supervisor = User::where('id', $supervisorId)
+                ->where('department', $manager->department)
+                ->where('role', 'supervisor')
+                ->first();
+            if (!$supervisor) {
+                return redirect()->back()->with('error', 'Invalid supervisor selection.');
+            }
+        }
+        $employee->supervisor_id = $supervisorId ?: null;
+        $employee->save();
+        return redirect()->back()->with('success', 'Supervisor assigned successfully.');
+    }
 }

@@ -18,7 +18,7 @@ class SupervisorSeeder extends Seeder
         
         if (!$supervisor) {
             $supervisor = User::create([
-                'name' => 'Supervisor',
+                'name' => 'Maria',
                 'email' => $supervisorEmail,
                 'password' => bcrypt('password123'),
                 'is_admin' => false,

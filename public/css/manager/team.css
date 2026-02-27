@@ -89,6 +89,29 @@
     font-size: 14px;
 }
 
+/* Supervisor dropdown styling in team table */
+.assign-supervisor-form select {
+    background: #232b36;
+    color: #e5e7eb;
+    border: 1.5px solid #374151;
+    border-radius: 6px;
+    padding: 7px 12px;
+    font-size: 14px;
+    min-width: 140px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+    margin: 0;
+    box-shadow: none;
+}
+.assign-supervisor-form select:focus {
+    border-color: #5B8DBE;
+    box-shadow: 0 0 0 2px rgba(91, 141, 190, 0.2);
+}
+.assign-supervisor-form option {
+    background: #232b36;
+    color: #e5e7eb;
+}
+
 .team-table tbody tr:hover {
     background: #374151;
 }

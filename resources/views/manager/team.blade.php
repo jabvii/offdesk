@@ -131,11 +131,17 @@
                                     <td>{{ $member->name }}</td>
                                     <td>{{ $member->email }}</td>
                                     <td>
-                                        @if($member->supervisor)
-                                            {{ $member->supervisor->name }}
-                                        @else
-                                            <span class="no-supervisor">-</span>
-                                        @endif
+                                        <form method="POST" action="{{ route('manager.assign.supervisor', $member->id) }}" class="assign-supervisor-form">
+                                            @csrf
+                                            <select name="supervisor_id" onchange="this.form.submit()" style="min-width: 120px;">
+                                                <option value="">-- Select Supervisor --</option>
+                                                @foreach($supervisors as $supervisor)
+                                                    <option value="{{ $supervisor->id }}" @if($member->supervisor && $member->supervisor->id == $supervisor->id) selected @endif>
+                                                        {{ $supervisor->name }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </form>
                                     </td>
                                     <td>
                                         @if($member->manager)
