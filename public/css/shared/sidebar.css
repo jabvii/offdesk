@@ -1,7 +1,7 @@
 /* Sidebar and Navigation Styles */
 .sidebar {
-    width: 220px;
-    min-width: 220px;
+    width: 180px;
+    min-width: 180px;
     flex-shrink: 0;
     background-color: #1f2937;
     color: #fff;
