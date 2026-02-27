@@ -278,132 +278,132 @@
 
 <script src="{{ asset('js/dashboard.js') }}"></script>
 <script>
-// Details Modal functions
-function openDetailsModal(id) {
-    document.getElementById('detailsModal' + id).classList.add('active');
-}
-
-function closeDetailsModal(id) {
-    document.getElementById('detailsModal' + id).classList.remove('active');
-}
-
-// Close details modal when clicking outside
-document.addEventListener('click', function(e) {
-    if (e.target.classList.contains('details-modal')) {
-        e.target.classList.remove('active');
+document.addEventListener('DOMContentLoaded', function() {
+    // Details Modal functions
+    window.openDetailsModal = function(id) {
+        document.getElementById('detailsModal' + id).classList.add('active');
     }
-});
-
-function confirmLogout() {
-    return confirm("Are you sure you want to logout?");
-}
-
-// Request Leave Modal
-const leaveRequestModal = document.getElementById('leaveRequestModal');
-function closeLeaveRequestModal() { leaveRequestModal.style.display = 'none'; }
-document.getElementById('openLeaveModalLink').addEventListener('click', function(e){
-    e.preventDefault();
-    leaveRequestModal.style.display = 'flex';
-});
-
-// Generate daily sessions for leave request
-const startDateInput = document.getElementById('start_date');
-const endDateInput = document.getElementById('end_date');
-const sessionsTableContainer = document.getElementById('sessionsTableContainer');
-const sessionsTableBody = document.getElementById('sessionsTableBody');
-
-function generateSessionsTable() {
-    const start = new Date(startDateInput.value);
-    const end = new Date(endDateInput.value);
-    if (!startDateInput.value || !endDateInput.value || start > end) {
-        sessionsTableContainer.style.display = 'none';
-        return;
+    window.closeDetailsModal = function(id) {
+        document.getElementById('detailsModal' + id).classList.remove('active');
     }
-    sessionsTableBody.innerHTML = '';
-    let currentDate = new Date(start);
-    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-
-    while(currentDate <= end){
-        const formattedDate = currentDate.toLocaleDateString('en-US', { year:'numeric', month:'2-digit', day:'2-digit' });
-        const dayOfWeek = currentDate.getDay();
-        const dayName = dayNames[dayOfWeek];
-        const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-        const row = document.createElement('tr');
-
-        if(isWeekend) {
-            row.style.backgroundColor = '#f0f0f0';
-            row.style.color = '#999';
-            row.innerHTML = `
-                <td>${formattedDate} <span style="font-weight: normal; color: #999;">(${dayName})</span></td>
-                <td>
-                    <span style="font-style: italic; color: #aaa;">
-                        Weekend
-                    </span>
-                </td>
-            `;
-        } else {
-            row.innerHTML = `<td>${formattedDate} <span style="font-weight: normal; color: #666;">(${dayName})</span></td>
-                <td>
-                    <select name="daily_sessions[]" class="session-select" required>
-                        <option value="whole_day">Whole Day</option>
-                        <option value="morning">Morning (8:00am-12:00pm)</option>
-                        <option value="afternoon">Afternoon (1:00pm-5:30pm)</option>
-                    </select>
-                </td>`;
+    // Close details modal when clicking outside
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('details-modal')) {
+            e.target.classList.remove('active');
         }
-
-        sessionsTableBody.appendChild(row);
-        currentDate.setDate(currentDate.getDate() + 1);
-    }
-    sessionsTableContainer.style.display = 'block';
-}
-startDateInput.addEventListener('change', generateSessionsTable);
-endDateInput.addEventListener('change', generateSessionsTable);
-
-// Approve/Reject Modal
-const actionModal = document.getElementById('actionModal');
-const modalTitle = document.getElementById('actionTitle');
-const form = document.getElementById('actionForm');
-const statusInput = document.getElementById('actionStatus');
-const remarks = document.getElementById('remarks');
-const approvalOptions = document.getElementById('approvalOptions');
-const rejectionOptions = document.getElementById('rejectionOptions');
-
-document.querySelectorAll('.action-btn').forEach(button => {
-    button.addEventListener('click', function() {
-        const action = this.dataset.action;
-        const leaveId = this.dataset.id;
-        modalTitle.textContent = action === 'approved' ? 'Approve Request' : 'Reject Request';
-        statusInput.value = action;
-        form.action = `/supervisor/leave-requests/${leaveId}/decision`;
-        remarks.value = '';
-        
-        // Show/hide relevant options based on action
-        if (action === 'approved') {
-            approvalOptions.style.display = '';
-            rejectionOptions.style.display = 'none';
-        } else {
-            approvalOptions.style.display = 'none';
-            rejectionOptions.style.display = '';
-        }
-        
-        actionModal.style.display = 'flex';
     });
-});
-document.querySelector('.conf-btn').addEventListener('click', function() {
-    if(remarks.value.trim() === '') { alert('Please select remarks'); return; }
-    form.submit();
-});
-document.querySelectorAll('.canc-btn').forEach(btn => btn.addEventListener('click', ()=> actionModal.style.display='none'));
-actionModal.addEventListener('click', e => { if(e.target === actionModal) actionModal.style.display='none'; });
-
-// Close all modals on Escape
-document.addEventListener('keydown', e=>{
-    if(e.key==='Escape'){
-        leaveRequestModal.style.display='none';
-        actionModal.style.display='none';
-        document.querySelectorAll('.details-modal.active').forEach(modal => modal.classList.remove('active'));
+    window.confirmLogout = function() {
+        return confirm("Are you sure you want to logout?");
     }
+    // Request Leave Modal
+    const leaveRequestModal = document.getElementById('leaveRequestModal');
+    window.closeLeaveRequestModal = function() { leaveRequestModal.style.display = 'none'; }
+    const openLeaveModalLink = document.getElementById('openLeaveModalLink');
+    if (openLeaveModalLink && leaveRequestModal) {
+        openLeaveModalLink.addEventListener('click', function(e){
+            e.preventDefault();
+            leaveRequestModal.style.display = 'flex';
+        });
+    }
+    // Generate daily sessions for leave request
+    const startDateInput = document.getElementById('start_date');
+    const endDateInput = document.getElementById('end_date');
+    const sessionsTableContainer = document.getElementById('sessionsTableContainer');
+    const sessionsTableBody = document.getElementById('sessionsTableBody');
+    function generateSessionsTable() {
+        if (!startDateInput || !endDateInput) return;
+        const start = new Date(startDateInput.value);
+        const end = new Date(endDateInput.value);
+        if (!startDateInput.value || !endDateInput.value || start > end) {
+            if (sessionsTableContainer) sessionsTableContainer.style.display = 'none';
+            return;
+        }
+        if (!sessionsTableBody) return;
+        sessionsTableBody.innerHTML = '';
+        let currentDate = new Date(start);
+        const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        while(currentDate <= end){
+            const formattedDate = currentDate.toLocaleDateString('en-US', { year:'numeric', month:'2-digit', day:'2-digit' });
+            const dayOfWeek = currentDate.getDay();
+            const dayName = dayNames[dayOfWeek];
+            const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+            const row = document.createElement('tr');
+            if(isWeekend) {
+                row.style.backgroundColor = '#f0f0f0';
+                row.style.color = '#999';
+                row.innerHTML = `
+                    <td>${formattedDate} <span style="font-weight: normal; color: #999;">(${dayName})</span></td>
+                    <td>
+                        <span style="font-style: italic; color: #aaa;">
+                            Weekend
+                        </span>
+                    </td>
+                `;
+            } else {
+                row.innerHTML = `<td>${formattedDate} <span style="font-weight: normal; color: #666;">(${dayName})</span></td>
+                    <td>
+                        <select name="daily_sessions[]" class="session-select" required>
+                            <option value="whole_day">Whole Day</option>
+                            <option value="morning">Morning (8:00am-12:00pm)</option>
+                            <option value="afternoon">Afternoon (1:00pm-5:30pm)</option>
+                        </select>
+                    </td>`;
+            }
+            sessionsTableBody.appendChild(row);
+            currentDate.setDate(currentDate.getDate() + 1);
+        }
+        sessionsTableContainer.style.display = 'block';
+    }
+    if (startDateInput) startDateInput.addEventListener('change', generateSessionsTable);
+    if (endDateInput) endDateInput.addEventListener('change', generateSessionsTable);
+    // Approve/Reject Modal
+    const actionModal = document.getElementById('actionModal');
+    const modalTitle = document.getElementById('actionTitle');
+    const form = document.getElementById('actionForm');
+    const statusInput = document.getElementById('actionStatus');
+    const remarks = document.getElementById('remarks');
+    const approvalOptions = document.getElementById('approvalOptions');
+    const rejectionOptions = document.getElementById('rejectionOptions');
+    document.querySelectorAll('.action-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const action = this.dataset.action;
+            const leaveId = this.dataset.id;
+            if (modalTitle) modalTitle.textContent = action === 'approved' ? 'Approve Request' : 'Reject Request';
+            if (statusInput) statusInput.value = action;
+            if (form) form.action = `/supervisor/leave-requests/${leaveId}/decision`;
+            if (remarks) remarks.value = '';
+            // Show/hide relevant options based on action
+            if (approvalOptions && rejectionOptions) {
+                if (action === 'approved') {
+                    approvalOptions.style.display = '';
+                    rejectionOptions.style.display = 'none';
+                } else {
+                    approvalOptions.style.display = 'none';
+                    rejectionOptions.style.display = '';
+                }
+            }
+            if (actionModal) actionModal.style.display = 'flex';
+        });
+    });
+    const confBtn = document.querySelector('.conf-btn');
+    if (confBtn) {
+        confBtn.addEventListener('click', function() {
+            if(remarks && remarks.value.trim() === '') { alert('Please select remarks'); return; }
+            if (form) form.submit();
+        });
+    }
+    document.querySelectorAll('.canc-btn').forEach(btn => btn.addEventListener('click', ()=> { if (actionModal) actionModal.style.display='none'; }));
+    if (actionModal) {
+        actionModal.addEventListener('click', e => { if(e.target === actionModal) actionModal.style.display='none'; });
+    }
+    // Close all modals on Escape
+    document.addEventListener('keydown', e=>{
+        if(e.key==='Escape'){
+            if (leaveRequestModal) leaveRequestModal.style.display='none';
+            if (actionModal) actionModal.style.display='none';
+            document.querySelectorAll('.details-modal.active').forEach(modal => modal.classList.remove('active'));
+        }
+    });
 });
 </script>
 </body>
