@@ -22,7 +22,6 @@
             <h2>OFFDesk Manager</h2>
             <ul class="nav-links">
                 <li><a href="{{ route('manager.dashboard') }}">Dashboard</a></li>
-                <li><a href="#" id="openLeaveModalLink">Request Leave</a></li>
                 <li> 
                     <a href="{{ route('manager.leave.requests') }}" class="active">
                         Requests

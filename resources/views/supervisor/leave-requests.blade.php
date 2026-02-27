@@ -22,7 +22,6 @@
             <h2>OFFDesk Supervisor</h2>
             <ul class="nav-links">
                 <li><a href="{{ route('supervisor.dashboard') }}">Dashboard</a></li>
-                <li><a href="#" id="openLeaveModalLink">Request Leave</a></li>
                 <li> 
                     <a href="{{ route('supervisor.leave.requests') }}" class="active">
                         Requests

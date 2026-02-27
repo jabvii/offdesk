@@ -22,7 +22,6 @@
             <h2>OFFDesk Employee</h2>
             <ul class="nav-links">
                 <li><a href="{{ route('dashboard') }}" @if(request()->routeIs('dashboard')) class="active" @endif>Dashboard</a></li>
-                <li><a href="#" id="openLeaveModalLink">Request Leave</a></li>
                 <li><a href="{{ route('employee.department') }}" @if(request()->routeIs('employee.department')) class="active" @endif>My Department</a></li>
                 <li><a href="{{ route('employee.leave.history') }}" @if(request()->routeIs('employee.leave.history')) class="active" @endif>Leave History</a></li>
             </ul>

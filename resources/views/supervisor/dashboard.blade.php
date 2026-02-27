@@ -23,7 +23,6 @@
             <h2>OFFDesk Supervisor</h2>
             <ul class="nav-links">
                 <li><a href="{{ route('supervisor.dashboard') }}" @if(request()->routeIs('supervisor.dashboard')) class="active" @endif>Dashboard</a></li>
-                <li><a href="#" id="openLeaveModalLink">Request Leave</a></li>
                 <li>
                     <a href="{{ route('supervisor.leave.requests') }}" @if(request()->routeIs('supervisor.leave.requests')) class="active" @endif>
                         Requests
@@ -61,7 +60,44 @@
 
             <!-- Greeting -->
             <div class="dashboard-greeting">
-                <span>Welcome, {{ auth()->user()->name }}!</span>
+                <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                    <span style="text-align: left;">Welcome, {{ auth()->user()->name }}!</span>
+                    <button type="button" class="btn btn-primary" style="text-align: right; max-width: 180px; width: auto; white-space: nowrap;" onclick="openLeaveModal()">Request Leave</button>
+                </div>
+            <style>
+                .modal#leaveRequestModal {
+                    display: none;
+                    position: fixed;
+                    z-index: 9999;
+                    left: 0;
+                    top: 0;
+                    width: 100vw;
+                    height: 100vh;
+                    overflow: auto;
+                    background: rgba(0,0,0,0.4);
+                }
+                .modal#leaveRequestModal .modal-content {
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: #fff;
+                    border-radius: 8px;
+                    min-width: 350px;
+                    max-width: 95vw;
+                    box-shadow: 0 2px 16px rgba(0,0,0,0.2);
+                }
+            </style>
+            <script>
+            function openLeaveModal() {
+                document.getElementById('leaveRequestModal').style.display = 'block';
+            }
+            </script>
+            <script>
+            function openLeaveModal() {
+                document.getElementById('leaveRequestModal').style.display = 'block';
+            }
+            </script>
             </div>
 
             <!-- Leave Balance Cards -->
