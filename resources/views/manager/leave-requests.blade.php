@@ -206,18 +206,27 @@
                                         </div>
 
                                         @if($hasSupervisorInChain)
-                                        <div class="chain-connector completed"></div>
-                                        <div class="tracking-step completed">
-                                            <div class="step-icon">✓</div>
-                                            <div class="step-info">
-                                                <span class="step-role">Supervisor</span>
-                                                <span class="step-name">{{ $employeeSupervisor->name }}</span>
-                                                <span class="step-detail">Approved</span>
-                                                @if($leave->supervisor_remarks)
-                                                    <span class="step-remarks">"{{ $leave->supervisor_remarks }}"</span>
-                                                @endif
+                                            @php
+                                                $supervisorApproved = in_array($leave->status, ['supervisor_approved_pending_manager', 'pending_manager', 'pending_admin', 'approved']) || $leave->supervisor_approved_at;
+                                            @endphp
+                                            <div class="chain-connector {{ $supervisorApproved ? 'completed' : 'waiting' }}"></div>
+                                            <div class="tracking-step {{ $supervisorApproved ? 'completed' : 'waiting' }}">
+                                                <div class="step-icon">{{ $supervisorApproved ? '✓' : '●' }}</div>
+                                                <div class="step-info">
+                                                    <span class="step-role">Supervisor</span>
+                                                    <span class="step-name">{{ $employeeSupervisor->name }}</span>
+                                                    <span class="step-detail">
+                                                        @if($supervisorApproved)
+                                                            Approved @if($leave->supervisor_approved_at) on {{ \Carbon\Carbon::parse($leave->supervisor_approved_at)->format('M d, Y h:i A') }} @endif
+                                                        @else
+                                                            Awaiting approval
+                                                        @endif
+                                                    </span>
+                                                    @if($leave->supervisor_remarks)
+                                                        <span class="step-remarks">"{{ $leave->supervisor_remarks }}"</span>
+                                                    @endif
+                                                </div>
                                             </div>
-                                        </div>
                                         @endif
 
                                         <div class="chain-connector current"></div>

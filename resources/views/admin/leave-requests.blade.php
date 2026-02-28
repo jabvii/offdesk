@@ -235,7 +235,9 @@
                                             <div class="step-info">
                                                 <span class="step-role">Supervisor</span>
                                                 <span class="step-name">{{ $employeeSupervisor->name }}</span>
-                                                <span class="step-detail">Approved</span>
+                                                <span class="step-detail">
+                                                    Approved @if($leave->supervisor_approved_at) on {{ \Carbon\Carbon::parse($leave->supervisor_approved_at)->format('M d, Y h:i A') }} @endif
+                                                </span>
                                                 @if($leave->supervisor_remarks)
                                                     <span class="step-remarks">"{{ $leave->supervisor_remarks }}"</span>
                                                 @endif
@@ -251,7 +253,9 @@
                                             <div class="step-info">
                                                 <span class="step-role">Manager</span>
                                                 <span class="step-name">{{ $employeeManager->name }}</span>
-                                                <span class="step-detail">Approved</span>
+                                                <span class="step-detail">
+                                                    Approved @if($leave->manager_approved_at) on {{ \Carbon\Carbon::parse($leave->manager_approved_at)->format('M d, Y h:i A') }} @endif
+                                                </span>
                                                 @if($leave->manager_remarks)
                                                     <span class="step-remarks">"{{ $leave->manager_remarks }}"</span>
                                                 @endif

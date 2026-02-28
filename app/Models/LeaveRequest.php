@@ -24,6 +24,7 @@ class LeaveRequest extends Model
         'admin_remarks',
         'manager_id',
         'forwarded_at',
+        'manager_approved_at',
     ];
 
     protected $casts = [

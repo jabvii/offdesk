@@ -97,6 +97,7 @@ class ManagerController extends Controller
                 $leave->update([
                     'status' => 'pending_admin',
                     'manager_remarks' => $request->manager_remarks,
+                    'manager_approved_at' => now(),
                     'forwarded_at' => now(),
                 ]);
             } elseif ($request->status === 'rejected') {
