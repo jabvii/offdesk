@@ -108,27 +108,48 @@ class LeaveRequestController extends Controller
             'calculated_total_days' => $totalDays,
         ]);
 
-        // Check overlapping leaves (approved or pending only)
-        $overlap = LeaveRequest::where('user_id', $user->id)
-            ->whereIn('status', [
-                'pending_supervisor',
-                'pending_manager', 
-                'pending_admin',
-                'supervisor_approved_pending_manager',
-                'approved'
-            ])
-            ->where(function($q) use ($start, $end) {
-                $q->whereBetween('start_date', [$start, $end])
-                  ->orWhereBetween('end_date', [$start, $end])
-                  ->orWhere(function($q2) use ($start, $end) {
-                      $q2->where('start_date', '<=', $start)
-                         ->where('end_date', '>=', $end);
-                  });
-            })
-            ->exists();
+        // Check overlapping leaves (approved or pending only) at session level
+        // Build list of weekday dates in the requested range and map requested sessions per date
+        $requestedDates = [];
+        $requestedSessions = [];
+        $currentDate = $start->copy();
+        $sessionIndex = 0;
+        while ($currentDate->lte($end)) {
+            if (!$currentDate->isWeekend()) {
+                $ds = $currentDate->toDateString();
+                $requestedDates[] = $ds;
+                $requestedSessions[$ds] = $validated['daily_sessions'][$sessionIndex] ?? null;
+                $sessionIndex++;
+            }
+            $currentDate->addDay();
+        }
 
-        if ($overlap) {
-            return back()->with('error', 'You already have a pending or approved leave request during these dates.');
+        if (!empty($requestedDates)) {
+            $existingSessions = LeaveRequestSession::whereIn('date', $requestedDates)
+                ->whereHas('leaveRequest', function($q) use ($user) {
+                    $q->where('user_id', $user->id)
+                        ->whereIn('status', [
+                            'pending_supervisor',
+                            'pending_manager', 
+                            'pending_admin',
+                            'supervisor_approved_pending_manager',
+                            'approved'
+                        ]);
+                })
+                ->get();
+
+            foreach ($existingSessions as $es) {
+                $dateStr = $es->date->toDateString();
+                $existingSession = $es->session;
+                $requestedSession = $requestedSessions[$dateStr] ?? null;
+
+                // If either is whole_day, or sessions match, it's a conflict
+                if ($requestedSession === 'whole_day' || $existingSession === 'whole_day' || $requestedSession === $existingSession) {
+                    return back()->with('error', "You already have a pending or approved leave request that conflicts on {$dateStr}.");
+                }
+
+                // morning vs afternoon are allowed (no conflict)
+            }
         }
 
         $currentYear = date('Y');

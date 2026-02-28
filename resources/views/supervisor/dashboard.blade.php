@@ -234,7 +234,7 @@
                                                             $dotClass = 'approved emergency';
                                                         }
                                                     @endphp
-                                                    <div class="leave-dot {{ $dotClass }}" title="{{ ucfirst($leave['type']) }} Leave ({{ ucfirst($leave['status']) }})">
+                                                    <div class="leave-dot {{ $dotClass }} {{ $leave['session'] }}" title="{{ ucfirst($leave['type']) }} Leave ({{ ucfirst($leave['status']) }})">
                                                         {{ $leave['status'] === 'pending' ? 'P' : $leave['acronym'] }}
                                                     </div>
                                                 @endforeach
@@ -634,8 +634,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     <td>
                         <select name="daily_sessions[]" class="session-select" data-date="${dateStr}" required>
                             <option value="whole_day">Whole Day</option>
-                            <option value="morning">Morning (8:00am-12:00pm)</option>
-                            <option value="afternoon">Afternoon (1:00pm-5:30pm)</option>
+                            <option value="morning">Morning</option>
+                            <option value="afternoon">Afternoon</option>
                         </select>
                     </td>
                 `;

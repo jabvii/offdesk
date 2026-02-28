@@ -165,14 +165,31 @@
 }
 
 .leave-dot {
+    position: absolute;
+    left: 0;
     width: 100%;
-    height: 100%;
-    font-size: 14px;
-    font-weight: bold;
+    font-size: 12px;
+    font-weight: 700;
     color: white;
     display: flex;
     align-items: center;
     justify-content: center;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+/* Positioning for session halves */
+.leave-dot.whole_day {
+    top: 0;
+    height: 100%;
+}
+.leave-dot.morning {
+    bottom: 0;
+    height: 50%;
+}
+.leave-dot.afternoon {
+    top: 0;
+    height: 50%;
 }
 
 /* Status-based colors */
