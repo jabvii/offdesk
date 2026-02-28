@@ -229,17 +229,24 @@
                                         </div>
 
                                         @if($hasSupervisorInChain)
-                                        <div class="chain-connector completed"></div>
-                                        <div class="tracking-step completed">
-                                            <div class="step-icon">✓</div>
+                                        @php
+                                            $isBypassed = $leave->supervisor_remarks === 'Bypassed by manager';
+                                        @endphp
+                                        <div class="chain-connector {{ $isBypassed ? 'bypassed' : 'completed' }}"></div>
+                                        <div class="tracking-step {{ $isBypassed ? 'bypassed' : 'completed' }}">
+                                            <div class="step-icon" style="{{ $isBypassed ? 'color: #f39c12;' : '' }}">{{ $isBypassed ? '●' : '✓' }}</div>
                                             <div class="step-info">
                                                 <span class="step-role">Supervisor</span>
                                                 <span class="step-name">{{ $employeeSupervisor->name }}</span>
                                                 <span class="step-detail">
-                                                    Approved @if($leave->supervisor_approved_at) on {{ \Carbon\Carbon::parse($leave->supervisor_approved_at)->format('M d, Y h:i A') }} @endif
+                                                    @if($isBypassed)
+                                                        Bypassed @if($leave->supervisor_approved_at) {{ \Carbon\Carbon::parse($leave->supervisor_approved_at)->format('M d, Y h:i A') }} @endif
+                                                    @else
+                                                        Approved @if($leave->supervisor_approved_at) on {{ \Carbon\Carbon::parse($leave->supervisor_approved_at)->format('M d, Y h:i A') }} @endif
+                                                    @endif
                                                 </span>
                                                 @if($leave->supervisor_remarks)
-                                                    <span class="step-remarks">"{{ $leave->supervisor_remarks }}"</span>
+                                                    <span class="step-remarks" style="{{ $isBypassed ? 'color: #f39c12;' : '' }}">"{{ $leave->supervisor_remarks }}"</span>
                                                 @endif
                                             </div>
                                         </div>

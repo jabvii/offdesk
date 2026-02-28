@@ -92,6 +92,9 @@
                             <td>
                                 @if($leave->status === 'pending_supervisor')
                                     <span style="color: #888; font-style: italic;">Waiting for supervisor</span>
+                                    <button class="action-btn action-bypass" data-id="{{ $leave->id }}" data-action="bypass" title="Bypass Supervisor" style="margin-left:8px;background:#f39c12;color:white;">
+                                        <i class="fas fa-forward"></i>
+                                    </button>
                                 @else
                                     <button class="action-btn action-approve" data-id="{{ $leave->id }}" data-action="approved" title="Approve"><i class="fas fa-check"></i></button>
                                     <button class="action-btn action-reject" data-id="{{ $leave->id }}" data-action="rejected" title="Reject"><i class="fas fa-times"></i></button>
@@ -207,23 +210,28 @@
 
                                         @if($hasSupervisorInChain)
                                             @php
+                                                $isBypassed = $leave->supervisor_remarks === 'Bypassed by manager';
                                                 $supervisorApproved = in_array($leave->status, ['supervisor_approved_pending_manager', 'pending_manager', 'pending_admin', 'approved']) || $leave->supervisor_approved_at;
                                             @endphp
-                                            <div class="chain-connector {{ $supervisorApproved ? 'completed' : 'waiting' }}"></div>
-                                            <div class="tracking-step {{ $supervisorApproved ? 'completed' : 'waiting' }}">
-                                                <div class="step-icon">{{ $supervisorApproved ? '✓' : '●' }}</div>
+                                            <div class="chain-connector {{ $supervisorApproved ? ($isBypassed ? 'bypassed' : 'completed') : 'waiting' }}"></div>
+                                            <div class="tracking-step {{ $supervisorApproved ? ($isBypassed ? 'bypassed' : 'completed') : 'waiting' }}">
+                                                <div class="step-icon" style="{{ $isBypassed ? 'color: #f39c12;' : '' }}">{{ $supervisorApproved ? ($isBypassed ? '●' : '✓') : '●' }}</div>
                                                 <div class="step-info">
                                                     <span class="step-role">Supervisor</span>
                                                     <span class="step-name">{{ $employeeSupervisor->name }}</span>
                                                     <span class="step-detail">
                                                         @if($supervisorApproved)
-                                                            Approved @if($leave->supervisor_approved_at) on {{ \Carbon\Carbon::parse($leave->supervisor_approved_at)->format('M d, Y h:i A') }} @endif
+                                                            @if($isBypassed)
+                                                                Bypassed @if($leave->supervisor_approved_at) {{ \Carbon\Carbon::parse($leave->supervisor_approved_at)->format('M d, Y h:i A') }} @endif
+                                                            @else
+                                                                Approved @if($leave->supervisor_approved_at) on {{ \Carbon\Carbon::parse($leave->supervisor_approved_at)->format('M d, Y h:i A') }} @endif
+                                                            @endif
                                                         @else
                                                             Awaiting approval
                                                         @endif
                                                     </span>
                                                     @if($leave->supervisor_remarks)
-                                                        <span class="step-remarks">"{{ $leave->supervisor_remarks }}"</span>
+                                                        <span class="step-remarks" style="{{ $isBypassed ? 'color: #f39c12;' : '' }}">"{{ $leave->supervisor_remarks }}"</span>
                                                     @endif
                                                 </div>
                                             </div>
@@ -444,7 +452,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const approvalOptions = document.getElementById('approvalOptions');
     const rejectionOptions = document.getElementById('rejectionOptions');
     document.querySelectorAll('.action-btn').forEach(button => {
-        button.addEventListener('click', function() {
+        button.addEventListener('click', function(e) {
+            // Prevent modal if bypass button was clicked
+            if (e.target.classList.contains('action-bypass') || this.classList.contains('action-bypass')) {
+                return;
+            }
             const action = this.dataset.action;
             const leaveId = this.dataset.id;
             if (modalTitle) modalTitle.textContent = action === 'approved' ? 'Approve Request' : 'Reject Request';
@@ -482,6 +494,26 @@ document.addEventListener('DOMContentLoaded', function() {
             if (actionModal) actionModal.style.display='none';
             document.querySelectorAll('.details-modal.active').forEach(modal => modal.classList.remove('active'));
         }
+    });
+    // Bypass Supervisor button
+    document.querySelectorAll('.action-bypass').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation(); // Prevent triggering other modals
+            var leaveId = btn.getAttribute('data-id');
+            if(confirm('Are you sure you want to bypass the supervisor and decide on this request?')) {
+                var form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '/manager/leave-requests/' + leaveId + '/bypass-supervisor';
+                var csrf = document.createElement('input');
+                csrf.type = 'hidden';
+                csrf.name = '_token';
+                csrf.value = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                form.appendChild(csrf);
+                document.body.appendChild(form);
+                form.submit();
+            }
+        });
     });
 });
 </script>

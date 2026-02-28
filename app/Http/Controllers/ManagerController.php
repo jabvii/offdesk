@@ -204,4 +204,27 @@ class ManagerController extends Controller
         $employee->save();
         return redirect()->back()->with('success', 'Supervisor assigned successfully.');
     }
+
+    // Bypass supervisor approval and allow manager to decide
+    public function bypassSupervisor(Request $request, $id)
+    {
+        $manager = Auth::user();
+        $leave = LeaveRequest::where('id', $id)
+            ->where('status', 'pending_supervisor')
+            ->firstOrFail();
+
+        // Verify manager is responsible for this employee
+        if ($leave->user->manager_id !== $manager->id) {
+            abort(403, 'Unauthorized');
+        }
+
+        // Skip supervisor, set status to pending_manager
+        $leave->update([
+            'status' => 'pending_manager',
+            'supervisor_remarks' => 'Bypassed by manager',
+            'supervisor_approved_at' => now(),
+        ]);
+
+        return back()->with('success', 'Supervisor approval bypassed. You may now approve or reject this request.');
+    }
 }

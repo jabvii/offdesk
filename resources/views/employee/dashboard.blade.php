@@ -404,12 +404,19 @@
                                 </div>
 
                                 @if($hasSupervisor)
-                                <div class="chain-connector {{ $supervisorStatus }}"></div>
+                                @php
+                                    $isBypassed = $request->supervisor_remarks === 'Bypassed by manager';
+                                @endphp
+                                <div class="chain-connector {{ $supervisorStatus === 'completed' ? ($isBypassed ? 'bypassed' : 'completed') : $supervisorStatus }}"></div>
                                 <!-- Supervisor -->
-                                <div class="tracking-step {{ $supervisorStatus }}">
-                                    <div class="step-icon">
+                                <div class="tracking-step {{ $supervisorStatus === 'completed' ? ($isBypassed ? 'bypassed' : 'completed') : $supervisorStatus }}">
+                                    <div class="step-icon" style="{{ $isBypassed ? 'color: #f39c12;' : '' }}">
                                         @if($supervisorStatus === 'completed')
-                                            ✓
+                                            @if($isBypassed)
+                                                ●
+                                            @else
+                                                ✓
+                                            @endif
                                         @elseif($supervisorStatus === 'rejected')
                                             ✗
                                         @elseif($supervisorStatus === 'cancelled')
@@ -424,7 +431,11 @@
                                         <span class="step-role">Supervisor</span>
                                         <span class="step-name">{{ $user->supervisor->name ?? 'N/A' }}</span>
                                         @if($supervisorStatus === 'completed' && $request->supervisor_approved_at)
-                                            <span class="step-detail">Approved {{ \Carbon\Carbon::parse($request->supervisor_approved_at)->format('M d, Y h:i A') }}</span>
+                                            @if($isBypassed)
+                                                <span class="step-detail" style="color: #f39c12;">Bypassed {{ \Carbon\Carbon::parse($request->supervisor_approved_at)->format('M d, Y h:i A') }}</span>
+                                            @else
+                                                <span class="step-detail">Approved {{ \Carbon\Carbon::parse($request->supervisor_approved_at)->format('M d, Y h:i A') }}</span>
+                                            @endif
                                         @elseif($supervisorStatus === 'rejected')
                                             <span class="step-detail rejected-text">Rejected</span>
                                         @elseif($supervisorStatus === 'cancelled')
@@ -435,7 +446,7 @@
                                             <span class="step-detail">Pending</span>
                                         @endif
                                         @if($request->supervisor_remarks)
-                                            <span class="step-remarks">"{{ $request->supervisor_remarks }}"</span>
+                                            <span class="step-remarks" style="{{ $isBypassed ? 'color: #f39c12;' : '' }}">"{{ $request->supervisor_remarks }}"</span>
                                         @endif
                                     </div>
                                 </div>
