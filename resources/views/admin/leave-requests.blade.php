@@ -193,9 +193,7 @@
 
                                 <div class="details-section">
                                     <h3>Reason</h3>
-                                    <div class="reason-box">
-                                        {{ $leave->reason }}
-                                    </div>
+                                    <p>{{ $leave->reason }}</p>
                                 </div>
 
                                 <div class="details-section">
