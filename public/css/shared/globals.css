@@ -23,7 +23,7 @@ body {
 
 .main-content {
     flex-grow: 1;
-    padding: 20px;
+    padding: 84px 20px 20px;
     min-width: 0;
     overflow-x: auto;
 }
@@ -36,6 +36,32 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+
+/* Fixed top header */
+.top-header {
+    position: fixed;
+    top: 0;
+    left: 195px; /* start after sidebar */
+    right: 0;
+    height: 64px;
+    background: #1f2937;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+}
+.top-header-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 0 20px;
+}
+.top-header .greeting-left {
+    color: #fff;
+    font-size: 18px;
+    font-weight: 600;
 }
 
 .dashboard-greeting span {
@@ -97,5 +123,27 @@ h3.vacation, h3.sick, h3.emergency {
         flex-direction: column;
         gap: 16px;
         align-items: stretch;
+    }
+}
+
+/* Ensure header content isn't covered by the sidebar on larger screens */
+@media (min-width: 769px) {
+    .top-header {
+        left: 195px;
+        right: 0;
+    }
+    .top-header-inner {
+        padding-left: 12px; /* small inner gap between header content and sidebar edge */
+    }
+}
+
+/* On small screens header should span full width */
+@media (max-width: 768px) {
+    .top-header {
+        left: 0;
+        right: 0;
+    }
+    .top-header-inner {
+        padding-left: 20px;
     }
 }

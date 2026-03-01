@@ -20,8 +20,10 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     window.closeModal = closeModal;
+    // expose open function for inline calls
+    window.openLeaveModal = openModal;
 
-    // modal button
+    // modal button (by id)
     const openBtn = document.getElementById('openLeaveModalLink');
     if (openBtn) {
         openBtn.addEventListener('click', function (e) {

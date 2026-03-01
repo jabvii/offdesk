@@ -16,6 +16,14 @@
 
 </head>
 <body>
+<header class="top-header">
+    <div class="container top-header-inner">
+        <div class="greeting-left">Welcome, {{ auth()->user()->name }}!</div>
+        <div class="greeting-actions">
+            <button id="openLeaveModalLink" type="button" class="btn btn-primary">Request Leave</button>
+        </div>
+    </div>
+</header>
 <div class="dashboard-container">
     <!-- Sidebar -->
     <nav class="sidebar">
@@ -49,43 +57,6 @@
             @if(session('error'))
                 <div class="alert alert-error">{{ session('error') }}</div>
             @endif
-
-            <!-- Greeting -->
-            <div class="dashboard-greeting">
-                <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
-                    <span style="text-align: left;">Welcome, {{ auth()->user()->name }}!</span>
-                    <button type="button" class="btn btn-primary" style="text-align: right; max-width: 180px; width: auto; white-space: nowrap;" onclick="openLeaveModal()">Request Leave</button>
-                </div>
-            <style>
-                .modal#leaveRequestModal {
-                    display: none;
-                    position: fixed;
-                    z-index: 9999;
-                    left: 0;
-                    top: 0;
-                    width: 100vw;
-                    height: 100vh;
-                    overflow: auto;
-                    background: rgba(0,0,0,0.4);
-                }
-                .modal#leaveRequestModal .modal-content {
-                    position: absolute;
-                    top: 50%;
-                    left: 50%;
-                    transform: translate(-50%, -50%);
-                    background: #fff;
-                    border-radius: 8px;
-                    min-width: 350px;
-                    max-width: 95vw;
-                    box-shadow: 0 2px 16px rgba(0,0,0,0.2);
-                }
-            </style>
-            <script>
-            function openLeaveModal() {
-                document.getElementById('leaveRequestModal').style.display = 'block';
-            }
-            </script>
-            </div>
 
             <!-- Leave Balance Cards -->
             <div class="balance-cards">

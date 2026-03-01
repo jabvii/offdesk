@@ -17,6 +17,12 @@
 </head>
 
 <body>
+<header class="top-header">
+    <div class="container top-header-inner">
+        <div class="greeting-left">Welcome, {{ auth()->user()->name }}!</div>
+        <!-- admin does not need request leave button -->
+    </div>
+</header>
 <div class="dashboard-container">
     <!-- Sidebar -->
     <nav class="sidebar">
@@ -76,9 +82,7 @@
                 <div class="alert alert-error">{{ session('error') }}</div>
             @endif
 
-            <div class="dashboard-greeting">
-                <span>Welcome, {{ auth()->user()->name }}!</span>
-            </div>
+            <!-- Greeting removed (now in fixed header) -->
 
         <!-- Admin Stats Section -->
         <div class="stats-grid">
