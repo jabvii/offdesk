@@ -9,7 +9,7 @@
     background: rgba(0,0,0,0.5);
     justify-content: center;
     align-items: center;
-    z-index: 999;
+    
 }
 .modal-content {
     background: white;
@@ -17,6 +17,7 @@
     border-radius: 8px;
     width: 400px;
     max-width: 90%;
+    z-index: 10001 !important;
 }
 .modal-actions {
     margin-top: 10px;

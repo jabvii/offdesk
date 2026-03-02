@@ -252,6 +252,8 @@
 .leave-request-info h4 {
     color: white;
     margin-bottom: 4px;
+    border-bottom: 1px solid gray;
+    padding-bottom: 10px;
 }
 
 /* Leave type name colors */
